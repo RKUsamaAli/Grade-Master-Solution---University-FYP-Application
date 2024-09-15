@@ -5,13 +5,13 @@
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
 
-  <title>Semester - Grade Master Solution</title>
+  <title>Students - Grade Master Solution</title>
   <meta content="" name="description" />
   <meta content="" name="keywords" />
 
   <!-- Favicons -->
   <link href="assets/img/favicon.png" rel="icon" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
   <!-- Google Fonts -->
   <link href="https://fonts.gstatic.com" rel="preconnect" />
@@ -25,7 +25,7 @@
     crossorigin="anonymous" referrerpolicy="no-referrer" />
 
   <!-- DataTables -->
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap5.min.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap5.min.css">
 
   <!-- DataTables -->
   <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
@@ -42,8 +42,15 @@
 
   <!-- Template Main CSS File -->
   <link href="assets/css/style.css" rel="stylesheet" />
+
+  <style>
+    .table th:nth-child(7),
+    .table td:nth-child(7) {
+      width: 17%;
+      /* Adjust the percentage as needed */
+    }
+  </style>
   <script type="module" src="./main.js"></script>
-  <script type="module" src="./course.js"></script>
 </head>
 
 <body>
@@ -150,26 +157,57 @@
             <div class="card-body">
               <div class="card-title d-flex justify-content-between align-items-center">
                 <h3>
-                  <strong>Courses</strong>
+                  <strong>Students</strong>
                 </h3>
                 <div>
                   <!-- Basic Modal -->
                   <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#basicModal">
                     <i class="bi bi-plus me-1"></i>
-                    Add Course
+                    Add Student
                   </button>
                   <div class="modal fade" id="basicModal" tabindex="-1">
                     <div class="modal-dialog">
                       <div class="modal-content">
                         <div class="modal-header">
-                          <h5 class="modal-title">Add Course</h5>
+                          <h5 class="modal-title">Add Student</h5>
                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
+                          <!-- First Name -->
                           <div class="row mb-3">
-                            <label for="inputText" class="col-sm-2 col-form-label">Name</label>
-                            <div class="col-sm-10">
-                              <input type="text" class="form-control" id="courseName" />
+                            <label for="inputText" class="col-sm-3 col-form-label">First Name</label>
+                            <div class="col-sm-9">
+                              <input type="text" class="form-control" id="fName" />
+                            </div>
+                          </div>
+                          <!-- lname -->
+                          <div class="row mb-3">
+                            <label for="inputText" class="col-sm-3 col-form-label">Last Name</label>
+                            <div class="col-sm-9">
+                              <input type="text" class="form-control" id="lName" />
+                            </div>
+                          </div>
+                          <!-- course -->
+                          <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Course</label>
+                            <div class="col-sm-9" id="courseSelection">
+                            </div>
+                          </div>
+
+                          <!-- Semester -->
+                          <div class="row mb-3" id="semesterSelection">
+                          </div>
+                          <!-- cgpa -->
+                          <div class="row mb-3">
+                            <label for="inputText" class="col-sm-3 col-form-label">CGPA</label>
+                            <div class="col-sm-9">
+                              <input type="number" class="form-control" id="cgpa" />
+                            </div>
+                          </div>
+                          <div class="row mb-3">
+                            <label for="inputDate" class="col-sm-3 col-form-label">DOB</label>
+                            <div class="col-sm-9">
+                              <input type="date" id="dob" class="form-control">
                             </div>
                           </div>
                         </div>
@@ -177,8 +215,8 @@
                           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             Close
                           </button>
-                          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="AddCourse()">
-                            Add Course
+                          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="Addstd()">
+                            Add Student
                           </button>
                         </div>
                       </div>
@@ -189,16 +227,21 @@
               </div>
 
               <!-- Table with stripped rows -->
-              <table class="table" id="courseTable">
+              <table class="table" id="stdTable">
                 <thead>
                   <tr>
-                    <th>Name</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Course</th>
+                    <th>Semester</th>
+                    <th>CGPA</th>
+                    <th data-type="date" data-format="YYYY/DD/MM">DOB</th>
                     <th></th>
                   </tr>
                 </thead>
-                <tbody id="tbody"></tbody>
+                <tbody id="tBody">
+                </tbody>
               </table>
-              <!-- End Table with stripped rows -->
             </div>
           </div>
         </div>
@@ -230,6 +273,7 @@
 
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
+  <script type="module" src="student.js"> </script>
 
 </body>
 

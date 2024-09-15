@@ -11,7 +11,7 @@
 
   <!-- Favicons -->
   <link href="assets/img/favicon.png" rel="icon" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
   <!-- Google Fonts -->
   <link href="https://fonts.gstatic.com" rel="preconnect" />
@@ -25,7 +25,7 @@
     crossorigin="anonymous" referrerpolicy="no-referrer" />
 
   <!-- DataTables -->
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap5.min.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap5.min.css">
 
   <!-- DataTables -->
   <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
@@ -42,8 +42,8 @@
 
   <!-- Template Main CSS File -->
   <link href="assets/css/style.css" rel="stylesheet" />
+  <script type="module" src="./semester.js"></script>
   <script type="module" src="./main.js"></script>
-  <script type="module" src="./course.js"></script>
 </head>
 
 <body>
@@ -83,7 +83,7 @@
               <hr class="dropdown-divider" />
             </li>
             <li>
-              <a class="dropdown-item d-flex align-items-center" href="#" id="logout">
+              <a class="dropdown-item d-flex align-items-center" id="logout" href="/login.html">
                 <i class="bi bi-box-arrow-right"></i>
                 <span>Sign Out</span>
               </a>
@@ -98,6 +98,7 @@
   </header>
   <!-- End Header -->
 
+  <!-- ======= Sidebar ======= -->
   <aside id="sidebar" class="sidebar">
     <ul class="sidebar-nav" id="sidebar-nav">
       <li class="nav-item">
@@ -150,26 +151,33 @@
             <div class="card-body">
               <div class="card-title d-flex justify-content-between align-items-center">
                 <h3>
-                  <strong>Courses</strong>
+                  <strong>Semester</strong>
                 </h3>
                 <div>
                   <!-- Basic Modal -->
                   <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#basicModal">
                     <i class="bi bi-plus me-1"></i>
-                    Add Course
+                    Add Semester
                   </button>
                   <div class="modal fade" id="basicModal" tabindex="-1">
                     <div class="modal-dialog">
                       <div class="modal-content">
                         <div class="modal-header">
-                          <h5 class="modal-title">Add Course</h5>
+                          <h5 class="modal-title">Add Semester</h5>
                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
+                          <!-- select semester -->
                           <div class="row mb-3">
-                            <label for="inputText" class="col-sm-2 col-form-label">Name</label>
-                            <div class="col-sm-10">
-                              <input type="text" class="form-control" id="courseName" />
+                            <label class="col-sm-3 col-form-label">Course</label>
+                            <div class="col-sm-9" id="courseShow">
+                            </div>
+                          </div>
+
+                          <div class="row mb-3">
+                            <label for="inputText" class="col-sm-3 col-form-label">Name</label>
+                            <div class="col-sm-9">
+                              <input type="text" class="form-control" id="semesterName" />
                             </div>
                           </div>
                         </div>
@@ -177,8 +185,8 @@
                           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             Close
                           </button>
-                          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="AddCourse()">
-                            Add Course
+                          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="AddSemester()">
+                            Add Semester
                           </button>
                         </div>
                       </div>
@@ -189,16 +197,17 @@
               </div>
 
               <!-- Table with stripped rows -->
-              <table class="table" id="courseTable">
+              <table class="table" id="semTable">
                 <thead>
                   <tr>
                     <th>Name</th>
+                    <th>Course</th>
                     <th></th>
                   </tr>
                 </thead>
-                <tbody id="tbody"></tbody>
+                <tbody id="taBody">
+                </tbody>
               </table>
-              <!-- End Table with stripped rows -->
             </div>
           </div>
         </div>
@@ -227,10 +236,8 @@
   <script src="assets/vendor/simple-datatables/simple-datatables.js"></script>
   <script src="assets/vendor/tinymce/tinymce.min.js"></script>
   <script src="assets/vendor/php-email-form/validate.js"></script>
-
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
-
 </body>
 
 </html>
