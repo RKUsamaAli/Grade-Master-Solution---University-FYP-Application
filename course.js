@@ -34,7 +34,7 @@ function tab() {
           return `
           <div class="text-end">
             <!-- Edit course -->
-            <a href="#" class="btn btn-no-animation" data-bs-toggle="modal" data-bs-target="#${updateMID}">
+            <a href="#" data-bs-toggle="modal" data-bs-target="#${updateMID}" style="margin-right: 10px;">
               <i class="fa-solid fa-pencil fa-lg" style="color: #0f54ae;"></i>
             </a>
             <div class="modal fade" id="${updateMID}" tabindex="-1">
@@ -60,7 +60,7 @@ function tab() {
               </div>
             </div>
             <!-- Delete course -->
-            <a href="#" class="btn btn-no-animation" data-bs-toggle="modal" data-bs-target="#${modalId}">
+            <a href="#" data-bs-toggle="modal" data-bs-target="#${modalId}">
               <i class="fa-solid fa-trash fa-lg" style="color: #f00000;"></i>
             </a>
             <div class="modal fade" id="${modalId}" tabindex="-1">
@@ -96,7 +96,7 @@ function updateCourseList() {
     text += `<tr><td>${courses[i].name}</td>
     <td class="text-end">
       <!-- edit course -->
-      <a href="#" class="btn btn-no-animation" data-bs-toggle="modal" data-bs-target="#${updateMID}">
+      <a href="#" data-bs-toggle="modal" data-bs-target="#${updateMID}" style="margin-right: 10px;">
         <i class="fa-solid fa-pencil fa-lg" style="color: #0f54ae;"></i>
       </a>
       <div class="modal fade" id="${updateMID}" tabindex="-1">
@@ -122,7 +122,7 @@ function updateCourseList() {
         </div>
       </div>
       <!-- delete course -->
-      <a href="#" class="btn btn-no-animation" data-bs-toggle="modal" data-bs-target="#${modalId}">
+      <a href="#" data-bs-toggle="modal" data-bs-target="#${modalId}">
         <i class="fa-solid fa-trash fa-lg" style="color: #f00000;"></i>
       </a>
       <div class="modal fade" id="${modalId}" tabindex="-1">

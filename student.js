@@ -85,7 +85,7 @@ function tab() {
                 
                 <!-- edit course -->
        
-                <a href="#" class="btn btn-no-animation" data-bs-toggle="modal" data-bs-target="#${updateMID}"><i class="fa-solid fa-pencil fa-lg" style="color: #0f54ae;"></i></a>
+                <a href="#" data-bs-toggle="modal" data-bs-target="#${updateMID}" style="margin-right: 10px;"><i class="fa-solid fa-pencil fa-lg" style="color: #0f54ae;"></i></a>
                 <div class="modal fade" id="${updateMID}" tabindex="-1">
             <div class="modal-dialog">
               <div class="modal-content">
@@ -205,7 +205,7 @@ function tab() {
           </div><!-- End Basic Modal-->
 
                 <!-- Delete Student -->
-                <a href="#" class="btn btn-no-animation" data-bs-toggle="modal" data-bs-target="#${modalId}">
+                <a href="#" data-bs-toggle="modal" data-bs-target="#${modalId}">
                 <i class="fa-solid fa-trash fa-lg" style="color: #f00000;"></i>
               </a>
               <div class="modal fade" id="${modalId}" tabindex="-1">
@@ -267,7 +267,7 @@ async function updateSTDList() {
                         <td class="text-end">
         <!-- edit course -->
        
-                <a href="#" class="btn btn-no-animation" data-bs-toggle="modal" data-bs-target="#${updateMID}"><i class="fa-solid fa-pencil fa-lg" style="color: #0f54ae;"></i></a>
+                <a href="#" data-bs-toggle="modal" data-bs-target="#${updateMID}" style="margin-right: 10px;"><i class="fa-solid fa-pencil fa-lg" style="color: #0f54ae;"></i></a>
                 <div class="modal fade" id="${updateMID}" tabindex="-1">
             <div class="modal-dialog">
               <div class="modal-content">
@@ -377,7 +377,7 @@ async function updateSTDList() {
           </div><!-- End Basic Modal-->
         
                 <!-- delete Student -->
-          <a href="#" class="btn btn-no-animation" data-bs-toggle="modal" data-bs-target="#${modalId}"><i class="fa-solid fa-trash fa-lg" style="color: #f00000;"></i></a>
+          <a href="#" data-bs-toggle="modal" data-bs-target="#${modalId}"><i class="fa-solid fa-trash fa-lg" style="color: #f00000;"></i></a>
           <div class="modal fade" id="${modalId}" tabindex="-1">
               <div class="modal-dialog">
               <div class="modal-content">

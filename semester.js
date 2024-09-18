@@ -44,7 +44,7 @@ function tab() {
           const modalId = `delSem${meta.row}`;
           return `
           <div class="text-end">
-            <a href="#" class="btn btn-no-animation" data-bs-toggle="modal" data-bs-target="#${modalId}">
+            <a href="#" data-bs-toggle="modal" data-bs-target="#${modalId}" style="margin-right: 10px;">
               <i class="fa-solid fa-trash fa-lg" style="color: #f00000;"></i>
             </a>
             <div class="modal fade" id="${modalId}" tabindex="-1">
@@ -82,7 +82,7 @@ async function updateSemesterList() {
       <td>${semesters[i].course}</td>
       <td class="text-end">
    <!-- delete semester -->
-                <a href="#" class="btn btn-no-animation" data-bs-toggle="modal" data-bs-target="#${modalId}"><i class="fa-solid fa-trash fa-lg" style="color: #f00000;"></i></a>
+                <a href="#" data-bs-toggle="modal" data-bs-target="#${modalId}"><i class="fa-solid fa-trash fa-lg" style="color: #f00000;"></i></a>
                 <div class="modal fade" id="${modalId}" tabindex="-1">
             <div class="modal-dialog">
               <div class="modal-content">
