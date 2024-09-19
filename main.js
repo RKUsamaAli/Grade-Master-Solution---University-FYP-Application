@@ -10,16 +10,15 @@ const varCour = "courses";
 const varSem = "semesters";
 const varSub = "subjects";
 const varStd = "students";
+const varMarks = "marks"
 
 // Check user authentication on page load
 document.addEventListener("DOMContentLoaded", () => {
   checkUserAuthentication((isAuthenticated, user) => {
     if (!isAuthenticated) {
-      // Redirect to login page if not authenticated
       window.location.href = "login.html";
     } else {
       console.log("User is signed in");
-      // You can proceed with your page logic
     }
   });
 });
@@ -57,7 +56,7 @@ async function getSem() {
             const cour = courseSnapshot.val();
             item.course = cour.name;
           } else {
-            item.course = 'Unknown'; // Handle case where course data is not available
+            item.course = 'Unknown';
           }
         });
         // Push promise to promises array and item to array
@@ -74,7 +73,6 @@ async function getSem() {
     console.error("Error fetching data:", error);
   }
 
-  console.log(JSON.stringify(array, null, 2));
   return array;
 }
 
@@ -95,7 +93,7 @@ async function getSub() {
             const cour = courseSnapshot.val();
             item.course = cour.name;
           } else {
-            item.course = 'Unknown'; // Handle case where course data is not available
+            item.course = 'Unknown';
           }
         });
 
@@ -105,13 +103,13 @@ async function getSub() {
             const sem = semSnapshot.val();
             item.semester = sem.name;
           } else {
-            item.semester = 'Unknown'; // Handle case where semester data is not available
+            item.semester = 'Unknown';
           }
         });
         // Push promise to promises array and item to array
         promises.push(semPromise);
         promises.push(coursePromise);
-        array.push(item); // Add item to array immediately
+        array.push(item);
       });
 
       // Wait for all promises to complete
@@ -123,7 +121,6 @@ async function getSub() {
     console.error("Error fetching data:", error);
   }
 
-  console.log(JSON.stringify(array, null, 2));
   return array;
 }
 // get students
@@ -142,7 +139,7 @@ async function getStd() {
             const cour = courseSnapshot.val();
             item.course = cour.name;
           } else {
-            item.course = 'Unknown'; // Handle case where course data is not available
+            item.course = 'Unknown';
           }
         });
 
@@ -152,7 +149,7 @@ async function getStd() {
             const sem = semSnapshot.val();
             item.semester = sem.name;
           } else {
-            item.semester = 'Unknown'; // Handle case where semester data is not available
+            item.semester = 'Unknown';
           }
         });
         // Push promise to promises array and item to array
@@ -170,8 +167,110 @@ async function getStd() {
     console.error("Error fetching data:", error);
   }
 
-  console.log(JSON.stringify(array, null, 2));
+  return array;
+}
+// get marks
+async function getMarks() {
+  const array = [];
+  try {
+    const snapshot = await getData(varMarks);
+    if (snapshot.exists()) {
+      const promises = [];
+      snapshot.forEach((childSnapshot) => {
+        const item = childSnapshot.val();
+        item.id = childSnapshot.key;
+        // Create a promise for fetching course data
+        const coursePromise = getData(`${varCour}/${item.courseId}`).then((courseSnapshot) => {
+          if (courseSnapshot.exists()) {
+            const cour = courseSnapshot.val();
+            item.course = cour.name;
+          } else {
+            item.course = 'Unknown';
+          }
+        });
+
+        // Create a promise for fetching semester data
+        const semPromise = getData(`${varSem}/${item.semesterId}`).then((semSnapshot) => {
+          if (semSnapshot.exists()) {
+            const sem = semSnapshot.val();
+            item.semester = sem.name;
+          } else {
+            item.semester = 'Unknown';
+          }
+        });
+
+        // Create a promise for fetching subject data
+        const subPromise = getData(`${varSub}/${item.subjectId}`).then((subSnap) => {
+          if (subSnap.exists()) {
+            const sub = subSnap.val();
+            item.subject = sub.name;
+          } else {
+            item.subject = 'Unknown';
+          }
+        });
+
+        // Create a promise for fetching student data
+        const stdPromise = getData(`${varStd}/${item.studentId}`).then((stdSnap) => {
+          if (stdSnap.exists()) {
+            const std = stdSnap.val();
+            item.student = std.name;
+          } else {
+            item.student = 'Unknown';
+          }
+        });
+
+        // Push promise to promises array and item to array
+        promises.push(semPromise);
+        promises.push(coursePromise);
+        promises.push(subPromise);
+        promises.push(stdPromise);
+        array.push(item); // Add item to array immediately
+      });
+
+      // Wait for all promises to complete
+      await Promise.all(promises);
+    } else {
+      console.log("No data available");
+    }
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+
   return array;
 }
 
-export { getCourses, getSem, getSub, getStd, varCour, varSem, varSub, varStd };
+async function dropdownOptions(id, index = "", selected = "") {
+  let options = ``;
+  var array = [];
+  switch (id) {
+    case 'course':
+      array = await queryByKeyValue(varCour);
+      break;
+
+    case 'semester':
+      const course = document.getElementById(`course${index}`).value;
+      array = await queryByKeyValue(varSem, "courseId", course);
+      break;
+
+    case 'subject':
+      const semester = document.getElementById(`semester${index}`).value;
+      array = await queryByKeyValue(varSub, "semesterId", semester);
+      break;
+
+    case 'student':
+      const semester1 = document.getElementById(`semester${index}`).value;
+      array = await queryByKeyValue(varStd, "semesterId", semester1);
+      break;
+
+    default:
+      console.error('Invalid id provided');
+      break;
+  }
+
+  for (let i = 0; i < array.length; i++) {
+    options += `<option value="${array[i].id}" ${array[i].name === selected ? "selected" : ""} >${array[i].name}</option>`;
+  }
+  document.getElementById(id + index).innerHTML = options;
+}
+
+export { getCourses, getSem, getSub, getStd, getMarks, varCour, varSem, varSub, varStd, varMarks, dropdownOptions };

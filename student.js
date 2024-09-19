@@ -3,63 +3,30 @@ import {
   updateData,
   removeData,
   randomID,
-  queryByKeyValue,
 } from "./firebaseConfig.js";
 import {
-  getSem,
-  getCourses,
   getStd,
-  varCour,
-  varSem,
   varStd,
-  varSub,
+  dropdownOptions
 } from "./main.js";
 
 var students = [];
-var courses = [];
-var semesters = [];
 let flagTab = false;
 async function initializtion() {
   try {
     students.length = 0;
     students = await getStd();
-    courses.length = 0;
-    courses = await getCourses();
-    semesters.length = 0;
-    semesters = await getSem();
     if (!flagTab) {
       tab();
       flagTab = true;
     }
     dataTable.clear().rows.add(students).draw();
-    updateSTDList();
+
+    // Populate dropdown options
+    dropdownOptions("course");
   } catch (error) {
     console.error("Error initializing data:", error);
   }
-}
-
-async function updateModalSemesters(index) {
-  const course = document.getElementById(`UCourse${index}`).value;
-  const semesterSelect = document.getElementById(`USem${index}`);
-
-  let sText = '<option value="">Select Semester</option>';
-
-  if (course) {
-    try {
-      const allSem = await queryByKeyValue(varSem, "courseId", course);
-      for (let k = 0; k < allSem.length; k++) {
-        sText += `<option value="${allSem[k].id}">${allSem[k].name}</option>`;
-      }
-    } catch (error) {
-      console.error("Error fetching semesters:", error);
-    }
-  }
-
-  semesterSelect.innerHTML = sText;
-}
-
-async function x(a, b, c) {
-  return await queryByKeyValue(a, b, c);
 }
 
 var dataTable;
@@ -67,8 +34,7 @@ function tab() {
   // Initialize DataTable
   dataTable = $("#stdTable").DataTable({
     columns: [
-      { title: "First Name", data: "firstName" },
-      { title: "Last Name", data: "lastName" },
+      { title: "Name", data: "name" },
       { title: "Course", data: "course" },
       { title: "Semester", data: "semester" },
       { title: "CGPA", data: "cgpa" },
@@ -81,341 +47,91 @@ function tab() {
           const modalId = `delSem${meta.row}`;
           const updateMID = `updateSem${meta.row}`;
           let txt = `
-                <div class="text-end">
-                
-                <!-- edit course -->
-       
-                <a href="#" data-bs-toggle="modal" data-bs-target="#${updateMID}" style="margin-right: 10px;"><i class="fa-solid fa-pencil fa-lg" style="color: #0f54ae;"></i></a>
-                <div class="modal fade" id="${updateMID}" tabindex="-1">
+            <div class="text-end">
+          <!-- Edit Student -->
+          <a onclick="dropdownOptions('course','${meta.row}','${data.course}'); dropdownOptions('semester','${meta.row}','${data.semester}')" data-bs-toggle="modal" data-bs-target="#${updateMID}" style="margin-right: 10px;">
+            <i class="fa-solid fa-pencil fa-lg" style="color: #0f54ae;"></i>
+          </a>
+          <div class="modal fade" id="${updateMID}" tabindex="-1">
             <div class="modal-dialog">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h5 class="modal-title">Update Student</h5>
+                  <h5 class="modal-title">Update Subject</h5>
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-
-                            <!-- First Name -->
-                            <div class="row mb-3">
-                              <label
-                                for="inputText"
-                                class="col-sm-3 col-form-label"
-                                >First Name</label
-                              >
-                              <div class="col-sm-9">
-                                <input
-                                  type="text"
-                                  class="form-control"
-                                  id="UfName${meta.row}"
-                                  value="${students[meta.row].firstName}"
-                                />
-                              </div>
-                            </div>
-                            <!-- lname -->
-                            <div class="row mb-3">
-                              <label
-                                for="inputText"
-                                class="col-sm-3 col-form-label"
-                                >Last Name</label
-                              >
-                              <div class="col-sm-9">
-                                <input
-                                  type="text"
-                                  class="form-control"
-                                  id="UlName${meta.row}"
-                                  value="${students[meta.row].lastName}"
-                                />
-                              </div>
-                            </div>
-                            <div class="row mb-3">
+                  <!-- course -->
+                  <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Course</label>
                     <div class="col-sm-9">
-                      <select class="form-select" id="UCourse${meta.row
-            }" onchange="updateModalSemesters(${meta.row})">
-                        <option value="">Select Course</option>`;
-          for (let j = 0; j < courses.length; j++) {
-            txt += `<option value="${courses[j].id}" ${courses[j].name === data.course ? "selected" : ""
-              }>${courses[j].name}</option>`;
-          }
-
-          txt += `</select>
+                      <select class="form-select" id="course${meta.row}" onchange="dropdownOptions('semester','${meta.row}')">
+                      </select>
                     </div>
                   </div>
+                  <!-- Semester -->
                   <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Semester</label>
                     <div class="col-sm-9">
-                      <select class="form-select" id="USem${meta.row}">
-                        <option value="">Select Semester</option>`;
-
-          // Populate the semesters based on the selected course
-          if (data.course) {
-            // Fetch semesters and populate options
-            (async () => {
-              try {
-                const allSem = await x(varSem, "courseId", data.courseId);
-                let sText = '<option value="">Select Semester</option>';
-                for (let k = 0; k < allSem.length; k++) {
-                  sText += `<option value="${allSem[k].name}" ${allSem[k].name === data.semester ? "selected" : ""
-                    }>${allSem[k].name}</option>`;
-                }
-                document.getElementById(`USem${meta.row}`).innerHTML = sText;
-              } catch (error) {
-                console.error("Error fetching semesters:", error);
-              }
-            })();
-          } else {
-            txt += '<option value="">Select Semester</option>';
-          }
-
-          txt += `</select>
+                      <select class="form-select" id="semester${meta.row}">
+                      </select>
                     </div>
                   </div>
-                            <!-- cgpa -->
-                            <div class="row mb-3">
-                              <label
-                                for="inputText"
-                                class="col-sm-3 col-form-label"
-                                >CGPA</label
-                              >
-                              <div class="col-sm-9">
-                                <input
-                                  type="number"
-                                  class="form-control"
-                                  id="Ucgpa${meta.row}"
-                                  value="${students[meta.row].cgpa}"
-                                />
-                              </div>
-                            </div>
-                            <div class="row mb-3">
-                              <label for="inputDate" class="col-sm-3 col-form-label">DOB</label>
-                              <div class="col-sm-9">
-                                <input type="date" id="Udob${meta.row
-            }" value="${students[meta.row].dob
-            }" class="form-control">
-                              </div>
-                            </div>
+                  <!-- First Name -->
+                  <div class="row mb-3">
+                    <label for="inputText" class="col-sm-3 col-form-label">Name</label>
+                    <div class="col-sm-9">
+                      <input type="text" class="form-control" id="name${meta.row}" value="${data.name}" />
+                    </div>
                   </div>
+                  <!-- cgpa -->
+                  <div class="row mb-3">
+                    <label for="inputText" class="col-sm-3 col-form-label">CGPA</label>
+                    <div class="col-sm-9">
+                      <input type="number" class="form-control" id="cgpa${meta.row}" value="${data.cgpa}" />
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <label for="inputDate" class="col-sm-3 col-form-label">DOB</label>
+                    <div class="col-sm-9">
+                      <input type="date" id="dob${meta.row}" class="form-control" value="${data.dob}" />
+                    </div>
+                  </div>
+                </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                  <button type="button" class="btn btn-primary" onclick="updateSTD('${meta.row
-            }')" data-bs-dismiss="modal">Update</button>
+                  <button type="button" class="btn btn-primary" onclick="updateSTD('${meta.row}')" data-bs-dismiss="modal">Update</button>
                 </div>
               </div>
             </div>
-          </div><!-- End Basic Modal-->
-
-                <!-- Delete Student -->
-                <a href="#" data-bs-toggle="modal" data-bs-target="#${modalId}">
-                <i class="fa-solid fa-trash fa-lg" style="color: #f00000;"></i>
-              </a>
-              <div class="modal fade" id="${modalId}" tabindex="-1">
-                <div class="modal-dialog">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title">Delete Course</h5>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body text-start">
-                      <p>Are you sure you want to delete this course?</p>
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-                      <button type="button" class="btn btn-danger" onclick="delSTD('${students[meta.row].id
-            }')" data-bs-dismiss="modal">Yes</button>
-                    </div>
-                  </div>
+          </div>
+          <!-- Delete Subject -->
+          <a href="#" data-bs-toggle="modal" data-bs-target="#${modalId}">
+            <i class="fa-solid fa-trash fa-lg" style="color: #f00000;"></i>
+          </a>
+          <div class="modal fade" id="${modalId}" tabindex="-1">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Delete Student</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-start">
+                  <p>Are you sure you want to delete this Student?</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                  <button type="button" class="btn btn-danger" onclick="delSTD('${data.id}')" data-bs-dismiss="modal">Yes</button>
                 </div>
               </div>
-
-                </div>
-                `;
+            </div>
+          </div>
+        </div>
+        `;
           return txt;
         },
       },
     ],
   });
-}
-
-// Function to populate semester options based on selected course
-async function populateSemesterOptions(course) {
-  let sText = `<label class="col-sm-3 col-form-label">Semester</label>
-               <div class="col-sm-9">
-                 <select class="form-select" aria-label="Default select example" id="semester">
-                   <option selected>Select Semester</option>`;
-  if (course !== "Select Course") {
-    const allSem = await queryByKeyValue(varSem, "courseId", course);
-    for (let i = 0; i < allSem.length; i++) {
-      sText += `<option value="${allSem[i].id}">${allSem[i].name}</option>`;
-    }
-  }
-  document.getElementById("semesterSelection").innerHTML =
-    sText + `</select></div>`;
-}
-
-async function updateSTDList() {
-  var text = ``;
-  for (var i = 0; i < students.length; i++) {
-    const modalId = `delSem${i}`;
-    const updateMID = `updateSub${i}`;
-    text += `<tr>
-                        <td>${students[i].firstName}</td>
-                        <td>${students[i].lastName}</td>
-                        <td>${students[i].course}</td>
-                        <td>${students[i].semester}</td>
-                        <td>${students[i].cgpa}</td>
-                        <td>${students[i].dob}</td>
-                        <td class="text-end">
-        <!-- edit course -->
-       
-                <a href="#" data-bs-toggle="modal" data-bs-target="#${updateMID}" style="margin-right: 10px;"><i class="fa-solid fa-pencil fa-lg" style="color: #0f54ae;"></i></a>
-                <div class="modal fade" id="${updateMID}" tabindex="-1">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title">Update Student</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-
-                            <!-- First Name -->
-                            <div class="row mb-3">
-                              <label
-                                for="inputText"
-                                class="col-sm-3 col-form-label"
-                                >First Name</label
-                              >
-                              <div class="col-sm-9">
-                                <input
-                                  type="text"
-                                  class="form-control"
-                                  id="UfName${i}"
-                                  value="${students[i].firstName}"
-                                />
-                              </div>
-                            </div>
-                            <!-- lname -->
-                            <div class="row mb-3">
-                              <label
-                                for="inputText"
-                                class="col-sm-3 col-form-label"
-                                >Last Name</label
-                              >
-                              <div class="col-sm-9">
-                                <input
-                                  type="text"
-                                  class="form-control"
-                                  id="UlName${i}"
-                                  value="${students[i].lastName}"
-                                />
-                              </div>
-                            </div>
-                            <div class="row mb-3">
-                  <label class="col-sm-3 col-form-label">Course</label>
-                  <div class="col-sm-9">
-                    <select class="form-select" id="UCourse${i}" onchange="updateModalSemesters(${i})">
-                      <option value="">Select Course</option>`;
-
-    for (let j = 0; j < courses.length; j++) {
-      text += `<option value="${courses[j].id}" ${courses[j].name === students[i].course ? "selected" : ""
-        }>${courses[j].name}</option>`;
-    }
-
-    text += `</select>
-                  </div>
-                </div>
-                <div class="row mb-3">
-                  <label class="col-sm-3 col-form-label">Semester</label>
-                  <div class="col-sm-9">
-                    <select class="form-select" id="USem${i}">
-                      <option value="">Select Semester</option>`;
-
-    // Populate the semesters based on the selected course
-    if (students[i].course) {
-      const allSem = await queryByKeyValue(
-        varSem,
-        "courseId",
-        students[i].courseId
-      );
-      for (let k = 0; k < allSem.length; k++) {
-        text += `<option value="${allSem[k].name}" ${allSem[k].name === students[i].semester ? "selected" : ""
-          }>${allSem[k].name}</option>`;
-      }
-    }
-
-    text += `</select>
-                  </div>
-                </div>
-                            <!-- cgpa -->
-                            <div class="row mb-3">
-                              <label
-                                for="inputText"
-                                class="col-sm-3 col-form-label"
-                                >CGPA</label
-                              >
-                              <div class="col-sm-9">
-                                <input
-                                  type="number"
-                                  class="form-control"
-                                  id="Ucgpa${i}"
-                                  value="${students[i].cgpa}"
-                                />
-                              </div>
-                            </div>
-                            <div class="row mb-3">
-                              <label for="inputDate" class="col-sm-3 col-form-label">DOB</label>
-                              <div class="col-sm-9">
-                                <input type="date" id="Udob${i}" value="${students[i].dob}" class="form-control">
-                              </div>
-                            </div>
-                  </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                  <button type="button" class="btn btn-primary" onclick="updateSTD('${i}')" data-bs-dismiss="modal">Update</button>
-                </div>
-              </div>
-            </div>
-          </div><!-- End Basic Modal-->
-        
-                <!-- delete Student -->
-          <a href="#" data-bs-toggle="modal" data-bs-target="#${modalId}"><i class="fa-solid fa-trash fa-lg" style="color: #f00000;"></i></a>
-          <div class="modal fade" id="${modalId}" tabindex="-1">
-              <div class="modal-dialog">
-              <div class="modal-content">
-                  <div class="modal-header">
-                  <h5 class="modal-title">Delete Course</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div class="modal-body text-start">
-                  <p>Are you sure you want to delete this student?</p>
-                  </div>
-                  <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-                  <button type="button" class="btn btn-danger" onclick="delSTD('${students[i].id}')" data-bs-dismiss="modal">Yes</button>
-                  </div>
-              </div>
-              </div>
-          </div><!-- End Basic Modal-->
-                
-                    </td></tr>`;
-  }
-  if (students.length != 0) document.getElementById("tBody").innerHTML = text;
-
-  // Populate course dropdown
-  let courseOptions = `<select class="form-select" aria-label="Default select example" id="course">
-                        <option selected>Select Course</option>`;
-  for (let i = 0; i < courses.length; i++) {
-    courseOptions += `<option value="${courses[i].id}">${courses[i].name}</option>`;
-  }
-  document.getElementById("courseSelection").innerHTML =
-    courseOptions + `</select>`;
-
-  // Add event listener for course selection change
-  document
-    .getElementById("course")
-    .addEventListener("change", async (event) => {
-      const selectedCourse = event.target.value;
-      await populateSemesterOptions(selectedCourse);
-    });
 }
 
 // CRUD Operation
@@ -424,8 +140,7 @@ async function updateSTDList() {
 function Addstd() {
   console.log("In add function");
   var std = {};
-  std.firstName = document.getElementById("fName").value.toUpperCase();
-  std.lastName = document.getElementById("lName").value.toUpperCase();
+  std.name = document.getElementById("name").value.toUpperCase();
   std.courseId = document.getElementById("course").value;
   var courseSelect = $("#course option:selected").text();
   std.semesterId = document.getElementById("semester").value;
@@ -435,8 +150,7 @@ function Addstd() {
 
   var duplicate = students.some(function (object) {
     return (
-      object.firstName.toUpperCase() === std.firstName.toUpperCase() &&
-      object.lastName.toUpperCase() === std.lastName.toUpperCase() &&
+      object.name.toUpperCase() === std.name.toUpperCase() &&
       object.course.toUpperCase() === courseSelect.toUpperCase() &&
       object.semester === semesterSelect &&
       object.dob === std.dob
@@ -453,8 +167,7 @@ function Addstd() {
       });
   }
 
-  document.getElementById("fName").value = "";
-  document.getElementById("lName").value = "";
+  document.getElementById("name").value = "";
   document.getElementById("course").selectedIndex = 0;
   document.getElementById("semester").selectedIndex = 0;
   document.getElementById("cgpa").value = "";
@@ -471,26 +184,28 @@ function delSTD(index) {
 
 function updateSTD(index) {
   var std = {};
-  std.firstName = document.getElementById(`UfName${index}`).value.toUpperCase();
-  std.lastName = document.getElementById(`UlName${index}`).value.toUpperCase();
-  std.course = document.getElementById(`UCourse${index}`).value.toUpperCase();
-  let courseSelect = $(`#UCourse${index} option:selected`).text();
-  std.semester = document.getElementById(`USem${index}`).value;
-  let semesterSelect = $(`#USem${index} option:selected`).text();
-  std.cgpa = parseFloat(document.getElementById(`Ucgpa${index}`).value);
-  std.dob = document.getElementById(`Udob${index}`).value;
+  std.name = document.getElementById(`name${index}`).value.toUpperCase();
+  std.courseId = document.getElementById(`course${index}`).value;
+  let courseSelect = $(`#course${index} option:selected`).text();
+  std.semesterId = document.getElementById(`semester${index}`).value;
+  let semesterSelect = $(`#semester${index} option:selected`).text();
+  std.cgpa = parseFloat(document.getElementById(`cgpa${index}`).value);
+  std.dob = document.getElementById(`dob${index}`).value;
 
   var duplicate = students.some(function (object) {
     return (
-      object.firstName.toUpperCase() === std.firstName.toUpperCase() &&
-      object.lastName.toUpperCase() === std.lastName.toUpperCase() &&
+      object.name.toUpperCase() === std.name.toUpperCase() &&
       object.course.toUpperCase() === courseSelect.toUpperCase() &&
       object.semester === semesterSelect &&
-      object.dob === std.dob
+      object.dob === std.dob &&
+      object.cgpa === std.cgpa
+
     );
   });
   if (duplicate) alert("Student already exists!");
   else {
+    console.log("Updated Data: " + JSON.stringify(std));
+
     updateData(`${varStd}/${students[index].id}`, std)
       .then(() => {
         initializtion();
@@ -502,6 +217,6 @@ function updateSTD(index) {
 window.Addstd = Addstd;
 window.delSTD = delSTD;
 window.updateSTD = updateSTD;
-window.updateModalSemesters = updateModalSemesters;
+window.dropdownOptions = dropdownOptions;
 // Initial call
 initializtion();

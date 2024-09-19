@@ -139,6 +139,12 @@
         </a>
       </li>
       <li class="nav-item">
+        <a class="nav-link collapsed" href="marks.html">
+          <i class="fa-solid fa-check"></i>
+          <span>Marks</span>
+        </a>
+      </li>
+      <li class="nav-item">
         <a class="nav-link collapsed" href="users-profile.html">
           <i class="bi bi-person"></i>
           <span>Profile</span>
@@ -173,29 +179,29 @@
                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                          <!-- First Name -->
-                          <div class="row mb-3">
-                            <label for="inputText" class="col-sm-3 col-form-label">First Name</label>
-                            <div class="col-sm-9">
-                              <input type="text" class="form-control" id="fName" />
-                            </div>
-                          </div>
-                          <!-- lname -->
-                          <div class="row mb-3">
-                            <label for="inputText" class="col-sm-3 col-form-label">Last Name</label>
-                            <div class="col-sm-9">
-                              <input type="text" class="form-control" id="lName" />
-                            </div>
-                          </div>
                           <!-- course -->
                           <div class="row mb-3">
                             <label class="col-sm-3 col-form-label">Course</label>
-                            <div class="col-sm-9" id="courseSelection">
+                            <div class="col-sm-9">
+                              <select class="form-select" id="course" onfocus="dropdownOptions('semester')"
+                                onchange="dropdownOptions('semester')">
+                              </select>
                             </div>
                           </div>
-
                           <!-- Semester -->
-                          <div class="row mb-3" id="semesterSelection">
+                          <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Semester</label>
+                            <div class="col-sm-9">
+                              <select class="form-select" id="semester">
+                              </select>
+                            </div>
+                          </div>
+                          <!-- First Name -->
+                          <div class="row mb-3">
+                            <label for="inputText" class="col-sm-3 col-form-label">Name</label>
+                            <div class="col-sm-9">
+                              <input type="text" class="form-control" id="name" />
+                            </div>
                           </div>
                           <!-- cgpa -->
                           <div class="row mb-3">
@@ -230,13 +236,12 @@
               <table class="table" id="stdTable">
                 <thead>
                   <tr>
-                    <th>First Name</th>
-                    <th>Last Name</th>
+                    <th>Name</th>
                     <th>Course</th>
                     <th>Semester</th>
                     <th>CGPA</th>
                     <th data-type="date" data-format="YYYY/DD/MM">DOB</th>
-                    <th></th>
+                    <th class="text-end">Actions</th>
                   </tr>
                 </thead>
                 <tbody id="tBody">

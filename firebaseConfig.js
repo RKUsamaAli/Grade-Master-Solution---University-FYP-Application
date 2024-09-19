@@ -85,32 +85,38 @@ async function fetchDataAndConvert(path) {
   return array;
 }
 
-// Get data (key,value) and include IDs
-async function queryByKeyValue(nodePath, key, value) {
+async function queryByKeyValue(nodePath, key = null, value = null) {
   try {
     const dbRef = ref(db, nodePath);
-    const queryRef = query(dbRef, orderByChild(key), equalTo(value));
+    let queryRef;
+
+    if (key && value) {
+      queryRef = query(dbRef, orderByChild(key), equalTo(value));
+    } else {
+      queryRef = dbRef;
+    }
+
     const snapshot = await get(queryRef);
 
     if (snapshot.exists()) {
       const data = snapshot.val();
       const rows = [];
 
-      // Iterate over each child snapshot and convert to row format
       for (const [id, item] of Object.entries(data)) {
-        item.id = id; // Append ID to item
-        rows.push(item); // Convert each item into a row
+        item.id = id;
+        rows.push(item);
       }
       return rows;
     } else {
       console.log("No data available for the given query.");
-      return []; // Return empty array if no data found
+      return [];
     }
   } catch (error) {
     console.error("Error querying data:", error);
     throw error;
   }
 }
+
 
 
 function checkUserAuthentication(callback) {
