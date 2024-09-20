@@ -3,55 +3,26 @@ import {
   updateData,
   removeData,
   randomID,
-  queryByKeyValue,
 } from "./firebaseConfig.js";
-import { getSem, getCourses, getSub, varSem, varSub } from "./main.js";
+import { getSub, varSub, dropdownOptions } from "./main.js";
 var subjects = [];
-var courses = [];
-var semesters = [];
 let flagTab = false;
 async function initializtion() {
-  // await queryDb('semesters','course','BSCS')
   try {
     subjects.length = 0;
     subjects = await getSub();
-    courses.length = 0;
-    courses = await getCourses();
-    semesters.length = 0;
-    semesters = await getSem();
     if (!flagTab) {
       tab();
       flagTab = true;
     }
     dataTable.clear().rows.add(subjects).draw();
-    updateSubjectList();
+
+    // Populate dropdown options
+    dropdownOptions("course");
+
   } catch (error) {
     console.error("Error initializing data:", error);
   }
-}
-
-async function updateModalSemesters(index) {
-  const course = document.getElementById(`UCourse${index}`).value;
-  const semesterSelect = document.getElementById(`USem${index}`);
-
-  let sText = '<option value="">Select Semester</option>';
-
-  if (course) {
-    try {
-      const allSem = await queryByKeyValue(varSem, "courseId", course);
-      for (let k = 0; k < allSem.length; k++) {
-        sText += `<option value="${allSem[k].id}">${allSem[k].name}</option>`;
-      }
-    } catch (error) {
-      console.error("Error fetching semesters:", error);
-    }
-  }
-
-  semesterSelect.innerHTML = sText;
-}
-
-async function x(a, b, c) {
-  return await queryByKeyValue(a, b, c);
 }
 
 var dataTable;
@@ -73,7 +44,7 @@ function tab() {
           let txt = `
         <div class="text-end">
           <!-- Edit Subject -->
-          <a href="#" class="btn btn-no-animation" data-bs-toggle="modal" data-bs-target="#${updateMID}">
+          <a onclick="dropdownOptions('course','${meta.row}','${data.course}'); dropdownOptions('semester','${meta.row}','${data.semester}')" data-bs-toggle="modal" data-bs-target="#${updateMID}" style="margin-right: 10px;">
             <i class="fa-solid fa-pencil fa-lg" style="color: #0f54ae;"></i>
           </a>
           <div class="modal fade" id="${updateMID}" tabindex="-1">
@@ -84,57 +55,34 @@ function tab() {
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                  <div class="row mb-3">
-                    <label for="inputText" class="col-sm-3 col-form-label">Name</label>
-                    <div class="col-sm-9">
-                      <input type="text" class="form-control" id="UName${meta.row}" value="${data.name}" />
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <label for="inputText" class="col-sm-3 col-form-label">Marks</label>
-                    <div class="col-sm-9">
-                      <input type="number" class="form-control" id="UMarks${meta.row}" value="${data.marks}" />
-                    </div>
-                  </div>
+                  <!-- course -->
                   <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Course</label>
                     <div class="col-sm-9">
-                      <select class="form-select" id="UCourse${meta.row}" onchange="updateModalSemesters(${meta.row})">
-                        <option value="">Select Course</option>`;
-          for (let j = 0; j < courses.length; j++) {
-            txt += `<option value="${courses[j].id}" ${courses[j].name === data.course ? "selected" : ""
-              }>${courses[j].name}</option>`;
-          }
-
-          txt += `</select>
+                      <select class="form-select" id="course${meta.row}" onchange="dropdownOptions('semester','${meta.row}')">
+                      </select>
                     </div>
                   </div>
+                  <!-- Semester -->
                   <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Semester</label>
                     <div class="col-sm-9">
-                      <select class="form-select" id="USem${meta.row}">`;
-
-          // Populate the semesters based on the selected course
-          if (data.course) {
-            // Fetch semesters and populate options
-            (async () => {
-              try {
-                const allSem = await x(varSem, "courseId", data.courseId);
-                let sText = '<option value="">Select Semester</option>';
-                for (let k = 0; k < allSem.length; k++) {
-                  sText += `<option value="${allSem[k].name}" ${allSem[k].name === data.semester ? "selected" : ""
-                    }>${allSem[k].name}</option>`;
-                }
-                document.getElementById(`USem${meta.row}`).innerHTML = sText;
-              } catch (error) {
-                console.error("Error fetching semesters:", error);
-              }
-            })();
-          } else {
-            txt += '<option value="">Select Semester</option>';
-          }
-
-          txt += `</select>
+                      <select class="form-select" id="semester${meta.row}">
+                      </select>
+                    </div>
+                  </div>
+                  <!-- Name -->
+                  <div class="row mb-3">
+                    <label for="inputText" class="col-sm-3 col-form-label">Name</label>
+                    <div class="col-sm-9">
+                      <input type="text" class="form-control" id="name${meta.row}" value="${data.name}" />
+                    </div>
+                  </div>
+                  <!-- Total Marks -->
+                  <div class="row mb-3">
+                    <label for="inputText" class="col-sm-3 col-form-label">Marks</label>
+                    <div class="col-sm-9">
+                      <input type="number" class="form-control" id="marks${meta.row}" value="${data.marks}" />
                     </div>
                   </div>
                 </div>
@@ -146,7 +94,7 @@ function tab() {
             </div>
           </div>
           <!-- Delete Subject -->
-          <a href="#" class="btn btn-no-animation" data-bs-toggle="modal" data-bs-target="#${modalId}">
+          <a href="#" data-bs-toggle="modal" data-bs-target="#${modalId}">
             <i class="fa-solid fa-trash fa-lg" style="color: #f00000;"></i>
           </a>
           <div class="modal fade" id="${modalId}" tabindex="-1">
@@ -175,145 +123,6 @@ function tab() {
   });
 }
 
-// Function to populate semester options based on selected course
-async function populateSemesterOptions(course) {
-  let sText = `<label class="col-sm-3 col-form-label">Semester</label>
-               <div class="col-sm-9">
-                 <select class="form-select" aria-label="Default select example" id="semester">
-                   <option selected>Select Semester</option>`;
-  if (course !== "Select Course") {
-    const allSem = await queryByKeyValue(varSem, "courseId", course);
-    for (let i = 0; i < allSem.length; i++) {
-      sText += `<option value="${allSem[i].id}">${allSem[i].name}</option>`;
-    }
-  }
-  document.getElementById("semesterSelection").innerHTML =
-    sText + `</select></div>`;
-}
-
-async function updateSubjectList() {
-  let text = "";
-  for (let i = 0; i < subjects.length; i++) {
-    const modalId = `delSem${i}`;
-    const updateMID = `updateSub${i}`;
-
-    text += `<tr><td>${subjects[i].name}</td>
-      <td>${subjects[i].marks}</td>
-      <td>${subjects[i].course}</td>
-      <td>${subjects[i].semester}</td>
-      <td class="text-end">
-        <a href="#" class="btn btn-no-animation" data-bs-toggle="modal" data-bs-target="#${updateMID}">
-          <i class="fa-solid fa-pencil fa-lg" style="color: #0f54ae;"></i>
-        </a>
-        <div class="modal fade" id="${updateMID}" tabindex="-1">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">Update Subject</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                <div class="row mb-3">
-                  <label for="inputText" class="col-sm-3 col-form-label">Name</label>
-                  <div class="col-sm-9">
-                    <input type="text" class="form-control" id="UName${i}" value="${subjects[i].name}" />
-                  </div>
-                </div>
-                <div class="row mb-3">
-                  <label for="inputText" class="col-sm-3 col-form-label">Marks</label>
-                  <div class="col-sm-9">
-                    <input type="number" class="form-control" id="UMarks${i}" value="${subjects[i].marks}" />
-                  </div>
-                </div>
-                <div class="row mb-3">
-                  <label class="col-sm-3 col-form-label">Course</label>
-                  <div class="col-sm-9">
-                    <select class="form-select" id="UCourse${i}" onchange="updateModalSemesters(${i})">
-                      <option value="">Select Course</option>`;
-
-    for (let j = 0; j < courses.length; j++) {
-      text += `<option value="${courses[j].id}" ${courses[j].name === subjects[i].course ? "selected" : ""
-        }>${courses[j].name}</option>`;
-    }
-
-    text += `</select>
-                  </div>
-                </div>
-                <div class="row mb-3">
-                  <label class="col-sm-3 col-form-label">Semester</label>
-                  <div class="col-sm-9">
-                    <select class="form-select" id="USem${i}">
-                      <option value="">Select Semester</option>`;
-
-    // Populate the semesters based on the selected course
-    if (subjects[i].course) {
-      const allSem = await queryByKeyValue(
-        varSem,
-        "courseId",
-        subjects[i].courseId
-      );
-      for (let k = 0; k < allSem.length; k++) {
-        text += `<option value="${allSem[k].name}" ${allSem[k].name === subjects[i].semester ? "selected" : ""
-          }>${allSem[k].name}</option>`;
-      }
-    }
-
-    text += `</select>
-                  </div>
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="updateSub('${i}')" data-bs-dismiss="modal">Update</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <a href="#" class="btn btn-no-animation" data-bs-toggle="modal" data-bs-target="#${modalId}">
-          <i class="fa-solid fa-trash fa-lg" style="color: #f00000;"></i>
-        </a>
-        <div class="modal fade" id="${modalId}" tabindex="-1">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">Delete Subject</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body text-start">
-                <p>Are you sure you want to delete this subject?</p>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-                <button type="button" class="btn btn-danger" onclick="delSub('${subjects[i].id}')" data-bs-dismiss="modal">Yes</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </td>
-    </tr>`;
-  }
-
-  if (subjects.length !== 0) {
-    $("#tBody").html(text);
-  }
-
-  // Populate course dropdown
-  let courseOptions = `<select class="form-select" aria-label="Default select example" id="course">
-                        <option selected>Select Course</option>`;
-  for (let i = 0; i < courses.length; i++) {
-    courseOptions += `<option value="${courses[i].id}">${courses[i].name}</option>`;
-  }
-  document.getElementById("courseSelection").innerHTML =
-    courseOptions + `</select>`;
-
-  // Add event listener for course selection change
-  document
-    .getElementById("course")
-    .addEventListener("change", async (event) => {
-      const selectedCourse = event.target.value;
-      await populateSemesterOptions(selectedCourse);
-    });
-}
 
 // CRUD Operations
 
@@ -366,12 +175,12 @@ function delSub(id) {
 
 //Update Subject
 function updateSub(index) {
-  var name = document.getElementById(`UName${index}`).value.trim();
-  var marks = document.getElementById(`UMarks${index}`).value.trim();
-  var course = document.getElementById(`UCourse${index}`).value.trim();
-  var courseSelect = $(`#UCourse${index} option:selected`).text();
-  var semester = document.getElementById(`USem${index}`).value.trim();
-  var semesterSelect = $(`#USem${index} option:selected`).text();
+  var name = document.getElementById(`name${index}`).value.trim();
+  var marks = document.getElementById(`marks${index}`).value.trim();
+  var course = document.getElementById(`course${index}`).value.trim();
+  var courseSelect = $(`#course${index} option:selected`).text();
+  var semester = document.getElementById(`semester${index}`).value.trim();
+  var semesterSelect = $(`#semester${index} option:selected`).text();
 
   // Check for duplicates
   var duplicate = subjects.some(function (subject) {
@@ -400,7 +209,7 @@ function updateSub(index) {
 window.delSub = delSub;
 window.updateSub = updateSub;
 window.AddSub = AddSub;
-window.updateModalSemesters = updateModalSemesters;
+window.dropdownOptions = dropdownOptions;
 
 // Initial call
 initializtion();
