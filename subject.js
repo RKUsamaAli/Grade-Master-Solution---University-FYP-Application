@@ -9,6 +9,8 @@ var subjects = [];
 let flagTab = false;
 async function initializtion() {
   try {
+    document.getElementById('loader').style.display = 'block';
+    document.getElementById('contentSection').style.display = 'none';
     subjects.length = 0;
     subjects = await getSub();
     if (!flagTab) {
@@ -16,6 +18,8 @@ async function initializtion() {
       flagTab = true;
     }
     dataTable.clear().rows.add(subjects).draw();
+    document.getElementById('contentSection').style.display = 'block';
+    document.getElementById('loader').style.display = 'none';
 
     // Populate dropdown options
     dropdownOptions("course");

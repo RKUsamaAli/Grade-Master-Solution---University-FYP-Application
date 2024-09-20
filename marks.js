@@ -13,6 +13,8 @@ var marks = [];
 let flagTab = false;
 async function initializtion() {
   try {
+    document.getElementById('loader').style.display = 'block';
+    document.getElementById('contentSection').style.display = 'none';
     marks.length = 0;
     marks = await getMarks();
 
@@ -21,6 +23,8 @@ async function initializtion() {
       flagTab = true;
     }
     dataTable.clear().rows.add(marks).draw();
+    document.getElementById('contentSection').style.display = 'block';
+    document.getElementById('loader').style.display = 'none';
     // Populate dropdown options
     dropdownOptions("course");
   } catch (error) {

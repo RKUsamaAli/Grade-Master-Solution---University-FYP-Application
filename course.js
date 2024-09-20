@@ -5,6 +5,8 @@ var courses = [];
 let flagTab = false;
 async function initializtion() {
   try {
+    document.getElementById('loader').style.display = 'block';
+    document.getElementById('contentSection').style.display = 'none';
     courses.length = 0;
     courses = await getCourses();
     if (!flagTab) {
@@ -12,6 +14,8 @@ async function initializtion() {
       flagTab = true;
     }
     courseTable.clear().rows.add(courses).draw();
+    document.getElementById('contentSection').style.display = 'block';
+    document.getElementById('loader').style.display = 'none';
   } catch (error) {
     console.error("Error initializing data:", error);
   }
