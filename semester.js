@@ -14,6 +14,8 @@ var semesters = [];
 let flagTab = false;
 async function initializtion() {
   try {
+    document.getElementById('loader').style.display = 'block';
+    document.getElementById('contentSection').style.display = 'none';
     semesters.length = 0;
     semesters = await getSem();
     if (!flagTab) {
@@ -21,6 +23,8 @@ async function initializtion() {
       flagTab = true;
     }
     dataTable.clear().rows.add(semesters).draw();
+    document.getElementById('contentSection').style.display = 'block';
+    document.getElementById('loader').style.display = 'none';
     // Populate dropdown options
     dropdownOptions("course");
   } catch (error) {

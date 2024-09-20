@@ -14,6 +14,8 @@ var students = [];
 let flagTab = false;
 async function initializtion() {
   try {
+    document.getElementById('loader').style.display = 'block';
+    document.getElementById('contentSection').style.display = 'none';
     students.length = 0;
     students = await getStd();
     if (!flagTab) {
@@ -21,7 +23,8 @@ async function initializtion() {
       flagTab = true;
     }
     dataTable.clear().rows.add(students).draw();
-
+    document.getElementById('contentSection').style.display = 'block';
+    document.getElementById('loader').style.display = 'none';
     // Populate dropdown options
     dropdownOptions("course");
   } catch (error) {
