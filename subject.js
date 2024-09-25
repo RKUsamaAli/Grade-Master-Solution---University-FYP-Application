@@ -3,8 +3,9 @@ import {
   updateData,
   removeData,
   randomID,
+  queryByKeyValue
 } from "./firebaseConfig.js";
-import { getSub, varSub, dropdownOptions } from "./main.js";
+import { getSub, varSub, dropdownOptions, varStd,varMarks } from "./main.js";
 var subjects = [];
 let flagTab = false;
 async function initializtion() {
@@ -127,11 +128,79 @@ function tab() {
   });
 }
 
+function validateAndAddSub() {
+  var course = document.getElementById("course").value;
+  var semester = document.getElementById("semester").value;
+  var subject = document.getElementById("subject").value.trim();
+  var marks = document.getElementById("marks").value.trim();
+
+  const errormsgcourse = document.getElementById("errormsgcourse");
+  const errormsgsem = document.getElementById("errormsgsem");
+  const errormsgsubject = document.getElementById("errormsgsubject");
+  const errormsgmarks = document.getElementById("errormsgmarks");
+
+  let flag = true;
+
+  // Validate Course
+  if (course === "") {
+    errormsgcourse.style.display = "block";
+    flag = false;
+  } else {
+    errormsgcourse.style.display = "none";
+  }
+
+  // Validate Semester
+  if (semester === "") {
+    errormsgsem.style.display = "block";
+    flag = false;
+  } else {
+    errormsgsem.style.display = "none";
+  }
+
+  // Validate Subject
+  if (subject === "") {
+    errormsgsubject.style.display = "block";
+    flag = false;
+  } else {
+    errormsgsubject.style.display = "none";
+  }
+
+  // Validate Marks
+  if (marks === "" || isNaN(marks) || marks < 0 || marks > 100) {
+    errormsgmarks.style.display = "block";
+    flag = false;
+  } else {
+    errormsgmarks.style.display = "none";
+  }
+
+  // If validation passes, proceed with adding the subject
+  if (flag) {
+    // Hide all error messages
+    errormsgcourse.style.display = "none";
+    errormsgsem.style.display = "none";
+    errormsgsubject.style.display = "none";
+    errormsgmarks.style.display = "none";
+
+    // Call the function to add the subject
+    AddSub();
+
+    // Clear fields after adding
+    document.getElementById("course").value = "";
+    document.getElementById("semester").value = "";
+    document.getElementById("subject").value = "";
+    document.getElementById("marks").value = "";
+
+    // Hide the modal
+    bootstrap.Modal.getInstance(document.getElementById('basicModal')).hide();
+  }
+}
+
+
 
 // CRUD Operations
 
 // Add Subject
-function AddSub() {
+async function AddSub() {
   var name = document.getElementById("subject").value;
   var marks = document.getElementById("marks").value;
   var course = document.getElementById("course").value;
@@ -149,7 +218,21 @@ function AddSub() {
   if (duplicate) {
     alert("The subject already exists in the same course and semester.");
   } else {
-    setData(`${varSub}/${randomID()}`, {
+    var subID = randomID();
+    var std = [];
+    std.length = 0;
+    std = await queryByKeyValue(varStd,"semesterId",semester);
+    for (let i = 0; i < std.length; i++) {
+      var mark = {}
+      mark.courseId = course;
+      mark.semesterId = semester;
+      mark.subjectId = subID;
+      mark.studentId = std[i].id;
+      mark.marks = 0;
+      mark.totalMarks = marks;
+      setData(`${varMarks}/${randomID()}`, mark);
+    }
+    setData(`${varSub}/${subID}`, {
       name: name.toUpperCase(),
       marks: marks,
       courseId: course,
@@ -162,14 +245,14 @@ function AddSub() {
         console.error("Error:", error);
       });
   }
-  document.getElementById("subject").value = "";
-  document.getElementById("marks").value = "";
-  document.getElementById("course").selectedIndex = 0;
-  document.getElementById("semester").selectedIndex = 0;
 }
 
 // Delete Subject
-function delSub(id) {
+async function delSub(id) {
+  var markData = await queryByKeyValue(varMarks,"subjectId",id);
+  markData.forEach(async (mark) => {
+    await removeData(`${varMarks}/${mark.id}`);
+  });
   removeData(`${varSub}/${id}`)
     .then(() => {
       initializtion();
@@ -212,8 +295,10 @@ function updateSub(index) {
 
 window.delSub = delSub;
 window.updateSub = updateSub;
-window.AddSub = AddSub;
+window.validateAndAddSub = validateAndAddSub;
 window.dropdownOptions = dropdownOptions;
 
 // Initial call
 initializtion();
+
+export {delSub}

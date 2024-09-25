@@ -195,6 +195,7 @@
                               <select class="form-select" id="course" onfocus="dropdownOptions('semester')"
                                 onchange="dropdownOptions('semester')">
                               </select>
+                              <span id="errormsgcourse" class="text-danger" style="display:none;">Please select course</span>
                             </div>
                           </div>
                           <!-- Semester -->
@@ -203,13 +204,23 @@
                             <div class="col-sm-9">
                               <select class="form-select" id="semester">
                               </select>
+                              <span id="errormsgsem" class="text-danger" style="display:none;">Please select Semester</span>
                             </div>
                           </div>
-                          <!-- First Name -->
+                          <!--ID -->
+                          <div class="row mb-3">
+                            <label for="inputText" class="col-sm-3 col-form-label">Roll No</label>
+                            <div class="col-sm-9">
+                              <input type="text" class="form-control" id="rollNo" />
+                              <span id="errormsgrollno" class="text-danger" style="display:none;">Please enter student Roll no</span>
+                            </div>
+                          </div>
+                          <!--Name -->
                           <div class="row mb-3">
                             <label for="inputText" class="col-sm-3 col-form-label">Name</label>
                             <div class="col-sm-9">
                               <input type="text" class="form-control" id="name" />
+                              <span id="errormsgname" class="text-danger" style="display:none;">Please enter student name</span>
                             </div>
                           </div>
                           <!-- cgpa -->
@@ -217,12 +228,14 @@
                             <label for="inputText" class="col-sm-3 col-form-label">CGPA</label>
                             <div class="col-sm-9">
                               <input type="number" class="form-control" id="cgpa" />
+                              <span id="errormsgcgpa" class="text-danger" style="display:none;">Please enter cgpa between 1 & 4</span>
                             </div>
                           </div>
                           <div class="row mb-3">
                             <label for="inputDate" class="col-sm-3 col-form-label">DOB</label>
                             <div class="col-sm-9">
                               <input type="date" id="dob" class="form-control">
+                              <span id="errormsgdob" class="text-danger" style="display:none;">Please enter DOB</span>
                             </div>
                           </div>
                         </div>
@@ -230,7 +243,7 @@
                           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             Close
                           </button>
-                          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="Addstd()">
+                          <button type="button" class="btn btn-primary" onclick="validateAndAdd()">
                             Add Student
                           </button>
                         </div>

@@ -188,6 +188,7 @@
                             <div class="col-sm-9">
                               <select class="form-select" id="course">
                               </select>
+                              <span id="error-msg-course" class="text-danger" style="display:none;">Please select course</span>
                             </div>
                           </div>
 
@@ -195,6 +196,7 @@
                             <label for="inputText" class="col-sm-3 col-form-label">Name</label>
                             <div class="col-sm-9">
                               <input type="text" class="form-control" id="semesterName" />
+                              <span id="error-msg-name" class="text-danger" style="display:none;">Please enter semester name</span>
                             </div>
                           </div>
                         </div>
@@ -202,7 +204,7 @@
                           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             Close
                           </button>
-                          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="AddSemester()">
+                          <button type="button" class="btn btn-primary" onclick="validateAndAdd()">
                             Add Semester
                           </button>
                         </div>

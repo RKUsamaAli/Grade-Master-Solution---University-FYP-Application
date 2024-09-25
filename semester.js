@@ -6,10 +6,13 @@ import {
 } from "./firebaseConfig.js";
 import {
   getSem,
-  varCour,
   varSem,
-  dropdownOptions
-} from "./main.js"
+  dropdownOptions,
+  varStd,
+  varSub
+} from "./main.js";
+import {delSTD} from './student.js';
+import {delSub} from './subject.js';
 var semesters = [];
 let flagTab = false;
 async function initializtion() {
@@ -74,6 +77,39 @@ function tab() {
   });
 }
 
+// validation
+function validateAndAdd() {
+  var name = document.getElementById("semesterName").value.trim();
+  var course = document.getElementById("course").value;
+
+  const errormsgname = document.getElementById("error-msg-name");
+  const errormsgcourse = document.getElementById("error-msg-course");
+
+  let flag = true;
+  
+  if (name === "") {
+    errormsgname.style.display = "block";
+    flag = false;
+  } 
+
+  if (course === "") {
+    errormsgcourse.style.display = "block";
+    flag = false;
+  }
+
+  if (flag) {
+    errormsgname.style.display = "none";
+    errormsgcourse.style.display = "none";
+
+    AddSemester();
+
+    document.getElementById("semesterName").value = "";
+    document.getElementById("course").value = "";
+    
+    bootstrap.Modal.getInstance(document.getElementById('basicModal')).hide();
+  }
+}
+
 // CRUD Operations
 
 // Add Semester
@@ -102,7 +138,15 @@ function AddSemester() {
 
 // Delete Semester
 
-function delSemester(id) {
+async function delSemester(id) {
+  var std = await queryByKeyValue(varStd,"semesterId",id);
+  std.forEach(async (mark) => {
+    delSTD(mark.id);
+  });
+  var sub = await queryByKeyValue(varSub,"semesterId",id);
+  sub.forEach(async (mark) => {
+    delSub(mark.id);
+  });
   removeData(`${varSem}/${id}`)
     .then(() => {
       initializtion();
@@ -112,8 +156,10 @@ function delSemester(id) {
 
 // Course selection in addition
 
-window.AddSemester = AddSemester;
+window.validateAndAdd = validateAndAdd;
 window.delSemester = delSemester;
 window.dropdownOptions = dropdownOptions;
 
 initializtion();
+
+export {delSemester}

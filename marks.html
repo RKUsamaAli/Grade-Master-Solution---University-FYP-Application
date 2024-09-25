@@ -151,16 +151,16 @@
     <!-- End Sidebar-->
 
     <main id="main" class="main">
-       <!-- Loader -->
-    <div id="loader">
-        <div class="d-flex justify-content-center align-items-center" style="height: 77vh;">
-            <div class="spinner-border" style="width: 40px; height: 40px;" role="status">
-            <span class="visually-hidden">Loading...</span>
-          </div>
+        <!-- Loader -->
+        <div id="loader">
+            <div class="d-flex justify-content-center align-items-center" style="height: 77vh;">
+                <div class="spinner-border" style="width: 40px; height: 40px;" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
         </div>
-      </div>
-    
-      <section id="contentSection" style="display: none;">
+
+        <section id="contentSection" style="display: none;">
             <div class="row">
                 <div class="col-lg-12">
                     <div class="card">
@@ -171,80 +171,10 @@
                                 </h3>
                                 <div>
                                     <!-- Basic Modal -->
-                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                                        data-bs-target="#basicModal">
+                                    <button type="button" class="btn btn-primary" onclick="AddMarkSection()">
                                         <i class="bi bi-plus me-1"></i>
                                         Add Marks
                                     </button>
-                                    <div class="modal fade" id="basicModal" tabindex="-1">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title">Add Marks</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                        aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <!-- course -->
-                                                    <div class="row mb-3">
-                                                        <label class="col-sm-3 col-form-label">Course</label>
-                                                        <div class="col-sm-9">
-                                                            <select class="form-select" id="course"
-                                                                onfocus="dropdownOptions('semester')"
-                                                                onchange="dropdownOptions('semester')">
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <!-- Semester -->
-                                                    <div class="row mb-3">
-                                                        <label class="col-sm-3 col-form-label">Semester</label>
-                                                        <div class="col-sm-9">
-                                                            <select class="form-select" id="semester"
-                                                                onfocus="dropdownOptions('subject');dropdownOptions('student')"
-                                                                onchange="dropdownOptions('subject');dropdownOptions('student')">
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <!-- subject -->
-                                                    <div class="row mb-3">
-                                                        <label class="col-sm-3 col-form-label">Subject</label>
-                                                        <div class="col-sm-9">
-                                                            <select class="form-select" id="subject">
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <!-- course -->
-                                                    <div class="row mb-3">
-                                                        <label class="col-sm-3 col-form-label">Student</label>
-                                                        <div class="col-sm-9">
-                                                            <select class="form-select" id="student">
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <!-- marks -->
-                                                    <div class="row mb-3">
-                                                        <label for="inputText"
-                                                            class="col-sm-3 col-form-label">Marks</label>
-                                                        <div class="col-sm-9">
-                                                            <input type="number" class="form-control" id="marks" />
-                                                        </div>
-                                                    </div>
-
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-bs-dismiss="modal">
-                                                        Close
-                                                    </button>
-                                                    <button type="button" class="btn btn-primary"
-                                                        data-bs-dismiss="modal" onclick="AddMarks()">
-                                                        Add Semester
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!-- End Basic Modal-->
                                 </div>
                             </div>
 
@@ -257,12 +187,64 @@
                                         <th>Semester</th>
                                         <th>Subject</th>
                                         <th>Marks</th>
-                                        <th class="text-end">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody id="taBody">
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Add Marks -->
+        <section id="AddMarksTable" style="display: none;">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="card-title d-flex justify-content-between align-items-center">
+                                <h3>
+                                    <strong>Add Marks</strong>
+                                </h3>
+                                <h3 id="error" class="text-danger" style="display:none;">Invalid Marks!!!</h3>
+                                <button type="button" class="btn btn-primary" onclick="validateAndAdd()">
+                                    <i class="bi bi-plus"></i>
+                                    Save
+                                </button>
+                            </div>
+                            <div class="row">
+                                <!-- course -->
+                                <div class="col-md-4">
+                                    <select class="col-md-6 form-select" id="course"
+                                        onfocus= "dropdownOptions('semester').then(() => dropdownOptions('subject').then(()=> showTable()))"
+                                        onchange="dropdownOptions('semester').then(() => dropdownOptions('subject').then(()=> showTable()))">
+                                    </select>
+                                    <span id="errormsgcourse" class="text-danger" style="display:none;">Please select
+                                        course</span>
+                                </div>
+                                <!-- Semester -->
+                                <div class="col-md-4">
+                                    <select class="form-select" id="semester" onfocus="dropdownOptions('subject').then(()=> showTable())"
+                                        onchange="dropdownOptions('subject').then(()=> showTable())">
+                                    </select>
+                                    <span id="errormsgsem" class="text-danger" style="display:none;">Please select
+                                        Semester</span>
+                                </div>
+                                <!-- subject -->
+                                <div class="col-md-4">
+                                    <select class="form-select" id="subject" onchange="showTable()">
+                                    </select>
+                                    <span id="errormsgsubject" class="text-danger" style="display:none;">Please select
+                                        subject</span>
+                                </div>
+                            </div>
+                            <h5 class="card-title mt-3">Students</h5>
+                            <!-- Table with hoverable rows -->
+                            <table class="table table-hover" id="stdData"> 
+                            </table>
+                            <!-- End Table with hoverable rows -->
                         </div>
                     </div>
                 </div>

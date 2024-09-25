@@ -196,6 +196,7 @@
                               <select class="form-select" id="course" onfocus="dropdownOptions('semester')"
                                 onchange="dropdownOptions('semester')">
                               </select>
+                              <span id="errormsgcourse" class="text-danger" style="display:none;">Please select course</span>
                             </div>
                           </div>
                           <!-- Semester -->
@@ -204,6 +205,7 @@
                             <div class="col-sm-9">
                               <select class="form-select" id="semester">
                               </select>
+                              <span id="errormsgsem" class="text-danger" style="display:none;">Please select semester</span>
                             </div>
                           </div>
                           <!-- subject -->
@@ -211,6 +213,7 @@
                             <label for="inputText" class="col-sm-3 col-form-label">Name</label>
                             <div class="col-sm-9">
                               <input type="text" class="form-control" id="subject" />
+                              <span id="errormsgsubject" class="text-danger" style="display:none;">Please enter subject name</span>
                             </div>
                           </div>
                           <!-- marks -->
@@ -218,6 +221,7 @@
                             <label for="inputText" class="col-sm-3 col-form-label">Marks</label>
                             <div class="col-sm-9">
                               <input type="number" class="form-control" id="marks" />
+                              <span id="errormsgmarks" class="text-danger" style="display:none;">Please enter valid marks between 0 and 100</span>
                             </div>
                           </div>
                         </div>
@@ -225,7 +229,7 @@
                           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             Close
                           </button>
-                          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="AddSub()">
+                          <button type="button" class="btn btn-primary" onclick="validateAndAddSub()">
                             Add Subject
                           </button>
                         </div>

@@ -1,6 +1,5 @@
 import {
   getData,
-  fetchDataAndConvert,
   checkUserAuthentication,
   signOutUser,
   queryByKeyValue
@@ -37,19 +36,39 @@ document.getElementById("logout").addEventListener("click", () => {
 
 // get courses
 async function getCourses() {
-  return await fetchDataAndConvert(varCour);
-}
-
-// get semesters
-async function getSem() {
   const array = [];
   try {
-    const snapshot = await getData(varSem);
+    const snapshot = await getData(varCour);
     if (snapshot.exists()) {
       const promises = [];
       snapshot.forEach((childSnapshot) => {
         const item = childSnapshot.val();
         item.id = childSnapshot.key;
+        array.push(item); // Add item to array immediately
+      });
+
+      // Wait for all promises to complete
+      await Promise.all(promises);
+    } else {
+      console.log("No data available");
+    }
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+
+  return array;
+}
+
+
+// get semesters
+async function getSem() {
+  const array = [];
+  try {
+    const snapshot = await queryByKeyValue(varSem,"status",true);
+    if (snapshot.length > 0) {
+      const promises = [];
+      snapshot.forEach((childSnapshot) => {
+        const item = childSnapshot;
         // Create a promise for fetching course data
         const coursePromise = getData(`${varCour}/${item.courseId}`).then((courseSnapshot) => {
           if (courseSnapshot.exists()) {
@@ -81,12 +100,11 @@ async function getSem() {
 async function getSub() {
   const array = [];
   try {
-    const snapshot = await getData(varSub);
-    if (snapshot.exists()) {
+    const snapshot = await queryByKeyValue(varSub,"status",true);
+    if (snapshot.length > 0) {
       const promises = [];
       snapshot.forEach((childSnapshot) => {
-        const item = childSnapshot.val();
-        item.id = childSnapshot.key;
+        const item = childSnapshot;
         // Create a promise for fetching course data
         const coursePromise = getData(`${varCour}/${item.courseId}`).then((courseSnapshot) => {
           if (courseSnapshot.exists()) {
@@ -127,12 +145,11 @@ async function getSub() {
 async function getStd() {
   const array = [];
   try {
-    const snapshot = await getData(varStd);
-    if (snapshot.exists()) {
+    const snapshot = await queryByKeyValue(varStd,"status",true);
+    if (snapshot.length > 0) {
       const promises = [];
       snapshot.forEach((childSnapshot) => {
-        const item = childSnapshot.val();
-        item.id = childSnapshot.key;
+        const item = childSnapshot;
         // Create a promise for fetching course data
         const coursePromise = getData(`${varCour}/${item.courseId}`).then((courseSnapshot) => {
           if (courseSnapshot.exists()) {
@@ -173,12 +190,11 @@ async function getStd() {
 async function getMarks() {
   const array = [];
   try {
-    const snapshot = await getData(varMarks);
-    if (snapshot.exists()) {
+    const snapshot = await queryByKeyValue(varMarks,"status");
+    if (snapshot.length > 0) {
       const promises = [];
       snapshot.forEach((childSnapshot) => {
-        const item = childSnapshot.val();
-        item.id = childSnapshot.key;
+        const item = childSnapshot;
         // Create a promise for fetching course data
         const coursePromise = getData(`${varCour}/${item.courseId}`).then((courseSnapshot) => {
           if (courseSnapshot.exists()) {
@@ -244,22 +260,23 @@ async function dropdownOptions(id, index = "", selected = "") {
   var array = [];
   switch (id) {
     case 'course':
-      array = await queryByKeyValue(varCour);
+      array = await queryByKeyValue(varCour,"status",true);
       break;
 
     case 'semester':
       const course = document.getElementById(`course${index}`).value;
-      array = await queryByKeyValue(varSem, "courseId", course);
+      array = await queryByKeyValue(varSem, "courseId", course,"status",true);
       break;
 
     case 'subject':
       const semester = document.getElementById(`semester${index}`).value;
-      array = await queryByKeyValue(varSub, "semesterId", semester);
+      if(semester != "")
+        array = await queryByKeyValue(varSub, "semesterId", semester,"status",true);
       break;
 
     case 'student':
       const semester1 = document.getElementById(`semester${index}`).value;
-      array = await queryByKeyValue(varStd, "semesterId", semester1);
+      array = await queryByKeyValue(varStd, "semesterId", semester1,"status",true);
       break;
 
     default:
@@ -268,7 +285,16 @@ async function dropdownOptions(id, index = "", selected = "") {
   }
 
   for (let i = 0; i < array.length; i++) {
-    options += `<option value="${array[i].id}" ${array[i].name === selected ? "selected" : ""} >${array[i].name}</option>`;
+    if(i == 0)
+    {
+      options += `<option value="${array[i].id}" selected>${array[i].name}</option>`;
+    }
+    else
+      options += `<option value="${array[i].id}" ${array[i].name === selected ? "selected" : ""} >${array[i].name}</option>`;
+  }
+  if(array.length == 0)
+  {
+    options += `<option value="" hidden disabled selected>No ${id} is present</option>`;
   }
   document.getElementById(id + index).innerHTML = options;
 }

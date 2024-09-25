@@ -65,33 +65,16 @@ function randomID(length = 10) {
   return result;
 }
 
-async function fetchDataAndConvert(path) {
-  var array = [];
-  try {
-    const snapshot = await getData(path);
-    if (snapshot.exists()) {
-      array.length = 0;
-      snapshot.forEach((childSnapshot) => {
-        const item = childSnapshot.val();
-        item.id = childSnapshot.key;
-        array.push(item);
-      });
-    } else {
-      console.log("No data available");
-    }
-  } catch (error) {
-    console.error("Error fetching data:", error);
-  }
-  return array;
-}
-
-async function queryByKeyValue(nodePath, key = null, value = null) {
+async function queryByKeyValue(nodePath, key1 = null, value1 = null, key2 = null, value2 = null) {
   try {
     const dbRef = ref(db, nodePath);
     let queryRef;
 
-    if (key && value) {
-      queryRef = query(dbRef, orderByChild(key), equalTo(value));
+    // If both key1 and key2 are provided
+    if (key1 && value1 && key2 && value2) {
+      queryRef = query(dbRef, orderByChild(key1), equalTo(value1));
+    } else if (key1 && value1) {
+      queryRef = query(dbRef, orderByChild(key1), equalTo(value1));
     } else {
       queryRef = dbRef;
     }
@@ -102,9 +85,12 @@ async function queryByKeyValue(nodePath, key = null, value = null) {
       const data = snapshot.val();
       const rows = [];
 
+      // Filter the results further based on the second key-value pair
       for (const [id, item] of Object.entries(data)) {
-        item.id = id;
-        rows.push(item);
+        if (!key2 || item[key2] === value2) {
+          item.id = id;
+          rows.push(item);
+        }
       }
       return rows;
     } else {
@@ -116,8 +102,6 @@ async function queryByKeyValue(nodePath, key = null, value = null) {
     throw error;
   }
 }
-
-
 
 function checkUserAuthentication(callback) {
   onAuthStateChanged(auth, (user) => {
@@ -139,7 +123,6 @@ export {
   updateData,
   removeData,
   randomID,
-  fetchDataAndConvert,
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,

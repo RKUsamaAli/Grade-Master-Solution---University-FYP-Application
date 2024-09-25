@@ -1,6 +1,8 @@
-import { setData, updateData, removeData, randomID } from "./firebaseConfig.js";
+import { setData, updateData, removeData, randomID, queryByKeyValue } from "./firebaseConfig.js";
 
-import { getCourses, varCour } from "./main.js";
+import { getCourses, varCour, varMarks, varSem, varStd, varSub } from "./main.js";
+
+import { delSemester } from './semester.js'
 var courses = [];
 let flagTab = false;
 async function initializtion() {
@@ -40,6 +42,9 @@ function tab() {
             <a href="#" data-bs-toggle="modal" data-bs-target="#${updateMID}" style="margin-right: 10px;">
               <i class="fa-solid fa-pencil fa-lg" style="color: #0f54ae;"></i>
             </a>
+            <span class="form-switch" style="margin-right: 10px;">
+              <input class="form-check-input" type="checkbox" id="${row.id}" ${row.status === true ? "checked" : ""} onchange="changestatus('${row.id}')">
+            </span>          
             <div class="modal fade" id="${updateMID}" tabindex="-1">
               <div class="modal-dialog">
                 <div class="modal-content">
@@ -91,6 +96,42 @@ function tab() {
   });
 }
 
+// validation
+function validateAndAdd() {
+  const courseName = document.getElementById("courseName").value.trim();
+  const errorMsg = document.getElementById("error-msg");
+
+  if (courseName === "") {
+    errorMsg.style.display = "block";
+  } else {
+    errorMsg.style.display = "none";
+    AddCourse();
+    document.getElementById("courseName").value = "";
+    bootstrap.Modal.getInstance(document.getElementById('basicModal')).hide();
+  }
+}
+
+async function changestatus(id)
+{
+  var status = document.getElementById(`${id}`).checked;
+  updateData(`${varCour}/${id}`, { status: status });
+  var sem = await queryByKeyValue(varSem, "courseId", id);
+  sem.forEach(async (temp) => {
+    updateData(`${varSem}/${temp.id}`, { status: status });
+  });
+  var sub = await queryByKeyValue(varSub, "courseId", id);
+  sub.forEach(async (temp) => {
+    updateData(`${varSub}/${temp.id}`, { status: status });
+  });
+  var std = await queryByKeyValue(varStd, "courseId", id);
+  std.forEach(async (temp) => {
+    updateData(`${varStd}/${temp.id}`, { status: status });
+  });
+  var mark = await queryByKeyValue(varMarks, "courseId", id);
+  mark.forEach(async (temp) => {
+    updateData(`${varMarks}/${temp.id}`, { status: status });
+  });
+}
 
 // CRUD Operations
 
@@ -104,7 +145,7 @@ function AddCourse() {
   if (exists) {
     alert("This course already exists!");
   } else if (name !== "") {
-    setData(`${varCour}/${randomID()}`, { name: name })
+    setData(`${varCour}/${randomID()}`, { name: name, status: true })
       .then(() => {
         initializtion();
       })
@@ -115,7 +156,11 @@ function AddCourse() {
 }
 
 // Delete Course
-function delCourse(id) {
+async function delCourse(id) {
+  var sem = await queryByKeyValue(varSem, "courseId", id);
+  sem.forEach(async (temp) => {
+    delSemester(temp.id);
+  });
   removeData(`${varCour}/${id}`)
     .then(() => {
       initializtion();
@@ -149,8 +194,8 @@ function updateCourse(rowIndex) {
 }
 
 // Expose functions to global scope
-window.AddCourse = AddCourse;
+window.validateAndAdd = validateAndAdd;
 window.delCourse = delCourse;
 window.updateCourse = updateCourse;
-
+window.changestatus = changestatus;
 initializtion();

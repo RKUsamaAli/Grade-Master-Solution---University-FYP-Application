@@ -1,13 +1,13 @@
 import {
-  setData,
-  removeData,
+  getData,
   updateData,
-  randomID,
+  queryByKeyValue
 } from "./firebaseConfig.js";
 import {
   getMarks,
   varMarks,
-  dropdownOptions
+  dropdownOptions,
+  varStd,
 } from "./main.js"
 var marks = [];
 let flagTab = false;
@@ -26,7 +26,9 @@ async function initializtion() {
     document.getElementById('contentSection').style.display = 'block';
     document.getElementById('loader').style.display = 'none';
     // Populate dropdown options
-    dropdownOptions("course");
+    dropdownOptions("course").then(() => dropdownOptions("semester").then(() => dropdownOptions('subject').then(() => showTable())));
+
+
   } catch (error) {
     console.error("Error initializing data:", error);
   }
@@ -42,191 +44,143 @@ function tab() {
       { data: "semester" },
       { data: "subject" },
       { data: "marks" },
-      {
-        data: null,
-        orderable: false,
-        searchable: false,
-        render: function (data, type, row, meta) {
-          const modalId = `delSem${meta.row}`;
-          const updateMID = `updateSem${meta.row}`;
-          let txt = `
-         <div class="text-end">
-          <!-- Edit Subject -->
-          <a onclick="dropdownOptions('course','${meta.row}','${data.course}'); 
-          dropdownOptions('semester','${meta.row}','${data.semester}');
-          dropdownOptions('subject','${meta.row}','${data.subject}');
-          dropdownOptions('student','${meta.row}','${data.student}');" 
-          data-bs-toggle="modal" data-bs-target="#${updateMID}" style="margin-right: 10px;">
-            <i class="fa-solid fa-pencil fa-lg" style="color: #0f54ae;"></i>
-          </a>
-          <div class="modal fade" id="${updateMID}" tabindex="-1">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title">Update Marks</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                  <!-- course -->
-                  <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">Course</label>
-                    <div class="col-sm-9">
-                      <select class="form-select" id="course${meta.row}" onchange="dropdownOptions('semester','${meta.row}')">
-                      </select>
-                    </div>
-                  </div>
-                  <!-- Semester -->
-                  <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">Semester</label>
-                    <div class="col-sm-9">
-                      <select class="form-select" id="semester${meta.row}" onchange="dropdownOptions('subject','${meta.row}');dropdownOptions('student','${meta.row}')">
-                      </select>
-                    </div>
-                  </div>
-                  <!-- Subject -->
-                  <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">Subject</label>
-                    <div class="col-sm-9">
-                      <select class="form-select" id="subject${meta.row}">
-                      </select>
-                    </div>
-                  </div>
-                  <!-- Student -->
-                  <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">Student</label>
-                    <div class="col-sm-9">
-                      <select class="form-select" id="student${meta.row}">
-                      </select>
-                    </div>
-                  </div>
-                  <!-- marks -->
-                  <div class="row mb-3">
-                      <label for="inputText"
-                          class="col-sm-3 col-form-label">Marks</label>
-                      <div class="col-sm-9">
-                          <input type="number" class="form-control" id="marks${meta.row}" value="${data.marks}" />
-                      </div>
-                  </div>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                  <button type="button" class="btn btn-primary" onclick="updateMarks('${meta.row}')" data-bs-dismiss="modal">Update</button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- Delete Subject -->
-          <a href="#" data-bs-toggle="modal" data-bs-target="#${modalId}">
-            <i class="fa-solid fa-trash fa-lg" style="color: #f00000;"></i>
-          </a>
-          <div class="modal fade" id="${modalId}" tabindex="-1">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title">Delete Subject</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-start">
-                  <p>Are you sure you want to delete this subject?</p>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-                  <button type="button" class="btn btn-danger" onclick="delMarks('${data.id}')" data-bs-dismiss="modal">Yes</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        `;
-          return txt;
-        },
-      },
     ],
   });
 }
+
+function AddMarkSection() {
+  document.getElementById('contentSection').style.display = 'none';
+  document.getElementById('AddMarksTable').style.display = 'block';
+}
+
+async function validateAndAdd() {
+  var course = document.getElementById("course").value;
+  var semester = document.getElementById("semester").value;
+  var subject = document.getElementById("subject").value;
+
+  const errormsgcourse = document.getElementById("errormsgcourse");
+  const errormsgsem = document.getElementById("errormsgsem");
+  const errormsgsubject = document.getElementById("errormsgsubject");
+  const error = document.getElementById("error");
+
+  let flag = true;
+
+  if (course === "") {
+    errormsgcourse.style.display = "block";
+    flag = false;
+  } else {
+    errormsgcourse.style.display = "none";
+  }
+
+  if (semester === "") {
+    errormsgsem.style.display = "block";
+    flag = false;
+  } else {
+    errormsgsem.style.display = "none";
+  }
+
+  if (subject === "") {
+    errormsgsubject.style.display = "block";
+    flag = false;
+  } else {
+    errormsgsubject.style.display = "none";
+  }
+  let sem = document.getElementById("semester").value;
+  let sub = document.getElementById("subject").value;
+  const tableData = await queryByKeyValue(varMarks, "semesterId", sem, "subjectId", sub);
+  for (let i = 0; i < tableData.length; i++) {
+    let mark = parseFloat(document.getElementById(`${tableData[i].studentId}`).value);
+    if (isNaN(mark) || mark < 0 || mark > tableData[i].totalMarks) {
+      error.style.display = "block";
+      flag = false;
+    } else {
+      error.style.display = "none";
+    }
+  }
+
+
+  if (flag) {
+    errormsgcourse.style.display = "none";
+    errormsgsem.style.display = "none";
+    errormsgsubject.style.display = "none";
+    error.style.display = "none";
+
+    AddMarks(); // Function to add marks
+
+    document.getElementById("course").value = "";
+    document.getElementById("semester").value = "";
+    document.getElementById("subject").value = "";
+  }
+}
+
+// show students marks table
+async function showTable() {
+  let sem = document.getElementById("semester").value;
+  let sub = document.getElementById("subject").value;
+  const tableData = await queryByKeyValue(varMarks, "semesterId", sem, "subjectId", sub);
+  let txt = ``;
+  for (let i = 0; i < tableData.length; i++) {
+    await getData(`${varStd}/${tableData[i].studentId}`).then((snap) => {
+      if (snap.exists()) {
+        console.log(snap);
+        const std = snap.val();
+        tableData[i].student = std.name;
+        tableData[i].studentRollNo = std.rollNo;
+      }
+    });
+  }
+  if (document.getElementById("subject").value != "" && tableData.length != 0) {
+    txt += `
+  <thead>
+      <tr>
+          <th scope="col">Roll No</th>
+          <th scope="col">Name</th>
+          <th scope="col">Total Marks</th>
+          <th scope="col">Marks</th>
+      </tr>
+  </thead>
+  <tbody>`
+    for (let i = 0; i < tableData.length; i++) {
+      txt += `<tr>
+          <td>${tableData[i].studentRollNo}</td>
+          <td>${tableData[i].student}</td>
+          <td>${tableData[i].totalMarks}</td>
+          <td><input type="number" class="form-control" style="width: 50%;" value="${tableData[i].marks}" id="${tableData[i].studentId}"></td>
+          </td>
+      </tr>
+    `}
+    txt += `</tbody>
+  </table>`;
+  }
+  else {
+    txt = `<p>No student present</p>`;
+    document.getElementById("error").style.display = "none";
+  }
+  document.getElementById("stdData").innerHTML = txt;
+}
+
 
 // CRUD Operations
 
 // Add Semester
 
-function AddMarks() {
-  var course = document.getElementById("course").value;
-  var courseSelect = $('#course option:selected').text();
-  var semester = document.getElementById("semester").value;
-  var semesterSelect = $('#semester option:selected').text();
-  var subject = document.getElementById("subject").value;
-  var subjectSelect = $('#subject option:selected').text();
-  var student = document.getElementById("student").value;
-  var studentSelect = $('#student option:selected').text();
-  var mark = document.getElementById("marks").value.trim();
+async function AddMarks() {
+  let sem = document.getElementById("semester").value;
+  let sub = document.getElementById("subject").value;
+  const tableData = await queryByKeyValue(varMarks, "semesterId", sem, "subjectId", sub);
 
-  var exists = marks.some(function (mark_) {
-    return mark_.course.toUpperCase() === courseSelect.toUpperCase() &&
-      mark_.semester.toUpperCase() === semesterSelect.toUpperCase() &&
-      mark_.student.toUpperCase() === studentSelect.toUpperCase() &&
-      mark_.subject.toUpperCase() === subjectSelect.toUpperCase()
-  });
-
-  if (exists) {
-    alert("This marks already exists!");
-  } else {
-    setData(`${varMarks}/${randomID()}`, { courseId: course, semesterId: semester, subjectId: subject, studentId: student, marks: mark })
-      .then(() => {
-        initializtion();
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+  for (let i = 0; i < tableData.length; i++) {
+    let mark = parseFloat(document.getElementById(`${tableData[i].studentId}`).value);
+    console.log(`Mark student${tableData[i].student}: ` + mark);
+    updateData(`${varMarks}/${tableData[i].id}`, { marks: mark })
   }
-}
-
-// Delete Semester
-
-function delMarks(id) {
-  removeData(`${varMarks}/${id}`)
-    .then(() => {
-      initializtion();
-    })
-    .catch((error) => console.error("Error deleting semester:", error));
-}
-
-function updateMarks(index) {
-  var std = {};
-  std.courseId = document.getElementById(`course${index}`).value;
-  let courseSelect = $(`#course${index} option:selected`).text();
-  std.semesterId = document.getElementById(`semester${index}`).value;
-  let semesterSelect = $(`#semester${index} option:selected`).text();
-  std.subjectId = document.getElementById(`subject${index}`).value;
-  let subjectSelect = $(`#subject${index} option:selected`).text();
-  std.studentId = document.getElementById(`student${index}`).value;
-  let studentSelect = $(`#student${index} option:selected`).text();
-  std.marks = parseFloat(document.getElementById(`marks${index}`).value);
-
-  var duplicate = marks.some(function (object) {
-    return (
-      object.course.toUpperCase() === courseSelect.toUpperCase() &&
-      object.semester.toUpperCase() === semesterSelect.toUpperCase() &&
-      object.subject.toUpperCase() === subjectSelect.toUpperCase() &&
-      object.student.toUpperCase() === studentSelect.toUpperCase() &&
-      object.marks.toUpperCase() === std.marks.toUpperCase()
-    );
-  });
-  if (duplicate) alert("Marks already exists!");
-  else {
-    console.log("Updated Data: " + JSON.stringify(std));
-
-    updateData(`${varMarks}/${marks[index].id}`, std)
-      .then(() => {
-        initializtion();
-      })
-      .catch((error) => console.error("Error updating student:", error));
-  }
+  document.getElementById('AddMarksTable').style.display = 'none';
+  initializtion();
 }
 
 // Course selection in addition
-
-window.AddMarks = AddMarks;
-window.delMarks = delMarks;
-window.updateMarks = updateMarks;
+window.AddMarkSection = AddMarkSection;
+window.validateAndAdd = validateAndAdd;
 window.dropdownOptions = dropdownOptions;
+window.showTable = showTable;
 initializtion();
