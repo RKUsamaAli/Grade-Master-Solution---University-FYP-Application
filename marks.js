@@ -8,6 +8,7 @@ import {
   varMarks,
   dropdownOptions,
   varStd,
+  convertMarksToGrade
 } from "./main.js"
 var marks = [];
 let flagTab = false;
@@ -44,6 +45,7 @@ function tab() {
       { data: "semester" },
       { data: "subject" },
       { data: "marks" },
+      { data: "grade" },
     ],
   });
 }
@@ -122,7 +124,6 @@ async function showTable() {
   for (let i = 0; i < tableData.length; i++) {
     await getData(`${varStd}/${tableData[i].studentId}`).then((snap) => {
       if (snap.exists()) {
-        console.log(snap);
         const std = snap.val();
         tableData[i].student = std.name;
         tableData[i].studentRollNo = std.rollNo;
@@ -136,6 +137,7 @@ async function showTable() {
           <th scope="col">Roll No</th>
           <th scope="col">Name</th>
           <th scope="col">Total Marks</th>
+          <th scope="col">Grade</th>
           <th scope="col">Marks</th>
       </tr>
   </thead>
@@ -145,7 +147,8 @@ async function showTable() {
           <td>${tableData[i].studentRollNo}</td>
           <td>${tableData[i].student}</td>
           <td>${tableData[i].totalMarks}</td>
-          <td><input type="number" class="form-control" style="width: 50%;" value="${tableData[i].marks}" id="${tableData[i].studentId}"></td>
+          <td>${tableData[i].grade}</td>
+          <td><input type="number" class="form-control" style="width: 50%; height: 30px;" value="${tableData[i].marks}" id="${tableData[i].studentId}"></td>
           </td>
       </tr>
     `}
@@ -171,8 +174,8 @@ async function AddMarks() {
 
   for (let i = 0; i < tableData.length; i++) {
     let mark = parseFloat(document.getElementById(`${tableData[i].studentId}`).value);
-    console.log(`Mark student${tableData[i].student}: ` + mark);
-    updateData(`${varMarks}/${tableData[i].id}`, { marks: mark })
+    let grade = convertMarksToGrade(mark);
+    updateData(`${varMarks}/${tableData[i].id}`, { marks: mark,grade: grade })
   }
   document.getElementById('AddMarksTable').style.display = 'none';
   initializtion();

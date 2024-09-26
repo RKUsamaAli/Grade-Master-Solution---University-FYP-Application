@@ -37,6 +37,7 @@ function tab() {
     columns: [
       { data: "name" },
       { data: "marks" },
+      { data: "credit" },
       { data: "course" },
       { data: "semester" },
       {
@@ -87,13 +88,20 @@ function tab() {
                   <div class="row mb-3">
                     <label for="inputText" class="col-sm-3 col-form-label">Marks</label>
                     <div class="col-sm-9">
-                      <input type="number" class="form-control" id="marks${meta.row}" value="${data.marks}" />
+                      <input type="number" class="form-control" id="marks${meta.row}" value="${data.marks}" disabled/>
+                    </div>
+                  </div>
+                  <!-- Credit Hour -->
+                  <div class="row mb-3">
+                    <label for="inputText" class="col-sm-3 col-form-label">Credit Hour</label>
+                    <div class="col-sm-9">
+                      <input type="number" class="form-control" id="credit${meta.row}" value="${data.credit}" />
                     </div>
                   </div>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                  <button type="button" class="btn btn-primary" onclick="updateSub('${meta.row}')" data-bs-dismiss="modal">Update</button>
+                  <button type="button" class="btn btn-primary" onclick="updateSub('${meta.row}','${data.id}')" data-bs-dismiss="modal">Update</button>
                 </div>
               </div>
             </div>
@@ -133,11 +141,13 @@ function validateAndAddSub() {
   var semester = document.getElementById("semester").value;
   var subject = document.getElementById("subject").value.trim();
   var marks = document.getElementById("marks").value.trim();
+  var credit = document.getElementById("credit").value.trim();
 
   const errormsgcourse = document.getElementById("errormsgcourse");
   const errormsgsem = document.getElementById("errormsgsem");
   const errormsgsubject = document.getElementById("errormsgsubject");
   const errormsgmarks = document.getElementById("errormsgmarks");
+  const errormsgcredit = document.getElementById("errormsgcredit");
 
   let flag = true;
 
@@ -173,6 +183,14 @@ function validateAndAddSub() {
     errormsgmarks.style.display = "none";
   }
 
+  // Validate Credit Hour
+  if (credit === "" || isNaN(credit) || credit < 0 || credit > 3) {
+    errormsgcredit.style.display = "block";
+    flag = false;
+  } else {
+    errormsgcredit.style.display = "none";
+  }
+
   // If validation passes, proceed with adding the subject
   if (flag) {
     // Hide all error messages
@@ -180,6 +198,7 @@ function validateAndAddSub() {
     errormsgsem.style.display = "none";
     errormsgsubject.style.display = "none";
     errormsgmarks.style.display = "none";
+    errormsgcredit.style.display = "none";
 
     // Call the function to add the subject
     AddSub();
@@ -189,6 +208,7 @@ function validateAndAddSub() {
     document.getElementById("semester").value = "";
     document.getElementById("subject").value = "";
     document.getElementById("marks").value = "";
+    document.getElementById("credit").value = "";
 
     // Hide the modal
     bootstrap.Modal.getInstance(document.getElementById('basicModal')).hide();
@@ -203,6 +223,7 @@ function validateAndAddSub() {
 async function AddSub() {
   var name = document.getElementById("subject").value;
   var marks = document.getElementById("marks").value;
+  var credit = document.getElementById("credit").value;
   var course = document.getElementById("course").value;
   var courseSelect = $("#course option:selected").text();
   var semester = document.getElementById("semester").value;
@@ -230,6 +251,8 @@ async function AddSub() {
       mark.studentId = std[i].id;
       mark.marks = 0;
       mark.totalMarks = marks;
+      mark.status = true;
+      mark.grade = 'F';
       setData(`${varMarks}/${randomID()}`, mark);
     }
     setData(`${varSub}/${subID}`, {
@@ -237,6 +260,8 @@ async function AddSub() {
       marks: marks,
       courseId: course,
       semesterId: semester,
+      credit: credit,
+      status: true,
     })
       .then(() => {
         initializtion();
@@ -261,9 +286,10 @@ async function delSub(id) {
 }
 
 //Update Subject
-function updateSub(index) {
+function updateSub(index,id) {
   var name = document.getElementById(`name${index}`).value.trim();
   var marks = document.getElementById(`marks${index}`).value.trim();
+  var credit = document.getElementById(`credit${index}`).value.trim();
   var course = document.getElementById(`course${index}`).value.trim();
   var courseSelect = $(`#course${index} option:selected`).text();
   var semester = document.getElementById(`semester${index}`).value.trim();
@@ -274,7 +300,8 @@ function updateSub(index) {
     return (
       subject.name.toUpperCase() === name.toUpperCase() &&
       subject.course.toUpperCase() === courseSelect.toUpperCase() &&
-      subject.semester.toUpperCase() === semesterSelect.toUpperCase()
+      subject.semester.toUpperCase() === semesterSelect.toUpperCase() &&
+      subject.id != id
     );
   });
   if (duplicate) {
@@ -285,6 +312,7 @@ function updateSub(index) {
       marks: marks,
       courseId: course,
       semesterId: semester,
+      credit: credit,
     })
       .then(() => {
         initializtion();

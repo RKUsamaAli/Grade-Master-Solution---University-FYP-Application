@@ -4,14 +4,15 @@ import {
   removeData,
   randomID,
   queryByKeyValue,
+  getData
 } from "./firebaseConfig.js";
 import {
   getStd,
-  getSub,
   varStd,
   varSub,
   varMarks,
-  dropdownOptions
+  dropdownOptions,
+  gradeToGPA
 } from "./main.js";
 
 var students = [];
@@ -23,7 +24,12 @@ async function initializtion() {
     document.getElementById('contentSection').style.display = 'none';
     students.length = 0;
     students = await getStd();
-    
+
+    // calculate gpa
+    for (let i = 0; i < students.length; i++) {
+      students[i].gpa = await calculateGPA(students[i].id);
+    }
+
     if (!flagTab) {
       tab();
       flagTab = true;
@@ -43,10 +49,11 @@ function tab() {
   // Initialize DataTable
   dataTable = $("#stdTable").DataTable({
     columns: [
+      { title: "Roll No", data: "rollNo" },
       { title: "Name", data: "name" },
       { title: "Course", data: "course" },
       { title: "Semester", data: "semester" },
-      { title: "CGPA", data: "cgpa" },
+      { title: "GPA", data: "gpa" },
       { title: "DOB", data: "dob" },
       {
         data: null,
@@ -89,7 +96,7 @@ function tab() {
                   <div class="row mb-3">
                     <label for="inputText" class="col-sm-3 col-form-label">Roll No</label>
                     <div class="col-sm-9">
-                      <input type="text" class="form-control" id="rollNo${meta.row}" value="${data.rollNo}" />
+                      <input type="text" class="form-control" id="rollNo${meta.row}" value="${data.rollNo}" disabled />
                     </div>
                   </div>
                   <!-- Name -->
@@ -99,13 +106,7 @@ function tab() {
                       <input type="text" class="form-control" id="name${meta.row}" value="${data.name}" />
                     </div>
                   </div>
-                  <!-- cgpa -->
-                  <div class="row mb-3">
-                    <label for="inputText" class="col-sm-3 col-form-label">CGPA</label>
-                    <div class="col-sm-9">
-                      <input type="number" class="form-control" id="cgpa${meta.row}" value="${data.cgpa}" />
-                    </div>
-                  </div>
+                  <!-- DOB -->
                   <div class="row mb-3">
                     <label for="inputDate" class="col-sm-3 col-form-label">DOB</label>
                     <div class="col-sm-9">
@@ -154,14 +155,12 @@ function validateAndAdd() {
   var course = document.getElementById("course").value;
   var semester = document.getElementById("semester").value;
   var name = document.getElementById("name").value.trim();
-  var cgpa = document.getElementById("cgpa").value.trim();
   var dob = document.getElementById("dob").value.trim();
   var rollNo = document.getElementById("rollNo").value.trim();
 
   const errormsgcourse = document.getElementById("errormsgcourse");
   const errormsgsem = document.getElementById("errormsgsem");
   const errormsgname = document.getElementById("errormsgname");
-  const errormsgcgpa = document.getElementById("errormsgcgpa");
   const errormsgdob = document.getElementById("errormsgdob");
   const errormsgrollno = document.getElementById("errormsgrollno");
 
@@ -194,13 +193,6 @@ function validateAndAdd() {
     errormsgname.style.display = "none";
   }
 
-  if (cgpa === "" || isNaN(cgpa) || cgpa < 0 || cgpa > 4) {
-    errormsgcgpa.style.display = "block";
-    flag = false;
-  } else {
-    errormsgcgpa.style.display = "none";
-  }
-
   if (dob === "") {
     errormsgdob.style.display = "block";
     flag = false;
@@ -212,7 +204,6 @@ function validateAndAdd() {
     errormsgcourse.style.display = "none";
     errormsgsem.style.display = "none";
     errormsgname.style.display = "none";
-    errormsgcgpa.style.display = "none";
     errormsgdob.style.display = "none";
 
     Addstd();
@@ -220,7 +211,6 @@ function validateAndAdd() {
     document.getElementById("course").value = "";
     document.getElementById("semester").value = "";
     document.getElementById("name").value = "";
-    document.getElementById("cgpa").value = "";
     document.getElementById("dob").value = "";
     document.getElementById("rollNo").value = "";
 
@@ -233,14 +223,13 @@ function validateAndAdd() {
 
 // Add Student
 async function Addstd() {
-  console.log("In add function");
   var std = {};
   std.name = document.getElementById("name").value.toUpperCase();
   std.courseId = document.getElementById("course").value;
   std.semesterId = document.getElementById("semester").value;
-  std.cgpa = parseFloat(document.getElementById("cgpa").value);
   std.dob = document.getElementById("dob").value;
   std.rollNo = document.getElementById("rollNo").value;
+  std.status = true;
 
   var duplicate = students.some(function (object) {
     return (
@@ -251,7 +240,7 @@ async function Addstd() {
   else {
     var stdID = randomID();
     subjects.length = 0;
-    subjects = await queryByKeyValue(varSub,"semesterId",std.semesterId);
+    subjects = await queryByKeyValue(varSub, "semesterId", std.semesterId);
     for (let i = 0; i < subjects.length; i++) {
       var mark = {}
       mark.courseId = std.courseId;
@@ -260,6 +249,8 @@ async function Addstd() {
       mark.studentId = stdID;
       mark.marks = 0;
       mark.totalMarks = subjects[i].marks;
+      mark.status = true;
+      mark.grade = 'F';
       setData(`${varMarks}/${randomID()}`, mark);
     }
     setData(`${varStd}/${stdID}`, std)
@@ -273,7 +264,7 @@ async function Addstd() {
 }
 
 async function delSTD(index) {
-  var markData = await queryByKeyValue(varMarks,"studentId",index);
+  var markData = await queryByKeyValue(varMarks, "studentId", index);
   markData.forEach(async (mark) => {
     await removeData(`${varMarks}/${mark.id}`);
   });
@@ -289,18 +280,19 @@ function updateSTD(index) {
   std.name = document.getElementById(`name${index}`).value.toUpperCase();
   std.courseId = document.getElementById(`course${index}`).value;
   std.semesterId = document.getElementById(`semester${index}`).value;
-  std.cgpa = parseFloat(document.getElementById(`cgpa${index}`).value);
   std.dob = document.getElementById(`dob${index}`).value;
   std.rollNo = document.getElementById(`rollNo${index}`).value;
 
   var duplicate = students.some(function (object) {
     return (
-      object.rollNo === std.rollNo
+      object.name === std.name &&
+      object.courseId === std.courseId &&
+      object.semesterId === std.semesterId &&
+      object.rollNo != std.rollNo
     );
   });
   if (duplicate) alert("Student already exists!");
   else {
-    console.log("Updated Data: " + JSON.stringify(std));
 
     updateData(`${varStd}/${students[index].id}`, std)
       .then(() => {
@@ -310,6 +302,30 @@ function updateSTD(index) {
   }
 }
 
+async function calculateGPA(id) {
+  const STD_subject = await queryByKeyValue(varMarks, "studentId", id);
+
+  // Add credit hour in subjects
+  for (let i = 0; i < STD_subject.length; i++) {
+    await getData(`${varSub}/${STD_subject[i].subjectId}`).then((subSnap) => {
+      if (subSnap.exists()) {
+        const sub = subSnap.val();
+        STD_subject[i].credit = sub.credit;
+      }
+    });
+  }
+
+  let totalCredits = 0;
+  let totalPoints = 0;
+
+  for (let item of STD_subject) {
+    const gpaValue = gradeToGPA(item.grade);
+    totalCredits += parseFloat(item.credit);
+    totalPoints += gpaValue * item.credit;    
+  }
+  return totalPoints / totalCredits;
+}
+
 window.validateAndAdd = validateAndAdd;
 window.delSTD = delSTD;
 window.updateSTD = updateSTD;
@@ -317,4 +333,4 @@ window.dropdownOptions = dropdownOptions;
 // Initial call
 initializtion();
 
-export {delSTD}
+export { delSTD }

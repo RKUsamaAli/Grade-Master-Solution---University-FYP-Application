@@ -126,7 +126,7 @@ function AddSemester() {
   if (exists) {
     alert("This semester already exists!");
   } else if (name !== "") {
-    setData(`${varSem}/${randomID()}`, { name: name, courseId: course })
+    setData(`${varSem}/${randomID()}`, { name: name, courseId: course, status: true })
       .then(() => {
         initializtion();
       })

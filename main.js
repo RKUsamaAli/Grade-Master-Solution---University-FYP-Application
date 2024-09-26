@@ -258,6 +258,12 @@ async function getMarks() {
 async function dropdownOptions(id, index = "", selected = "") {
   let options = ``;
   var array = [];
+  let element = document.getElementById(id + index);
+
+  if (!element) {
+    return;
+  }
+
   switch (id) {
     case 'course':
       array = await queryByKeyValue(varCour,"status",true);
@@ -285,18 +291,62 @@ async function dropdownOptions(id, index = "", selected = "") {
   }
 
   for (let i = 0; i < array.length; i++) {
-    if(i == 0)
-    {
+    if(i == 0) {
       options += `<option value="${array[i].id}" selected>${array[i].name}</option>`;
     }
     else
       options += `<option value="${array[i].id}" ${array[i].name === selected ? "selected" : ""} >${array[i].name}</option>`;
-  }
+    }
   if(array.length == 0)
   {
     options += `<option value="" hidden disabled selected>No ${id} is present</option>`;
   }
-  document.getElementById(id + index).innerHTML = options;
+
+  element.innerHTML = options;
 }
 
-export { getCourses, getSem, getSub, getStd, getMarks, varCour, varSem, varSub, varStd, varMarks, dropdownOptions };
+
+function convertMarksToGrade(marks) {
+  if (marks >= 90 && marks <= 100) {
+      return 'A+';
+  } else if (marks >= 85 && marks < 90) {
+      return 'A';
+  } else if (marks >= 80 && marks < 85) {
+      return 'A-';
+  } else if (marks >= 75 && marks < 80) {
+      return 'B+';
+  } else if (marks >= 70 && marks < 75) {
+      return 'B';
+  } else if (marks >= 65 && marks < 70) {
+      return 'B-';
+  } else if (marks >= 60 && marks < 65) {
+      return 'C+';
+  } else if (marks >= 55 && marks < 60) {
+      return 'C';
+  } else if (marks >= 50 && marks < 55) {
+      return 'C-';
+  } else if (marks >= 0 && marks < 50) {
+      return 'F';
+  } else {
+      return 'Invalid Marks';
+  }
+}
+
+function gradeToGPA(grade) {
+  switch(grade.toUpperCase()) {
+      case 'A+': return 4.0;
+      case 'A': return 4.0;
+      case 'A-': return 3.7;
+      case 'B+': return 3.3;
+      case 'B': return 3.0;
+      case 'B-': return 2.7;
+      case 'C+': return 2.3;
+      case 'C': return 2.0;
+      case 'C-': return 1.7;
+      case 'D': return 1.0;
+      case 'F': return 0.0;
+      default: return null;
+  }
+}
+
+export { getCourses, getSem, getSub, getStd, getMarks, varCour, varSem, varSub, varStd, varMarks, dropdownOptions,convertMarksToGrade,gradeToGPA };
