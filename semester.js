@@ -9,12 +9,21 @@ import {
   varSem,
   dropdownOptions,
   varStd,
-  varSub
+  varSub,
+  getCookie
 } from "./main.js";
-import {delSTD} from './student.js';
-import {delSub} from './subject.js';
+import { delSTD } from './student.js';
+import { delSub } from './subject.js';
 var semesters = [];
 let flagTab = false;
+
+document.addEventListener("DOMContentLoaded", async () => {
+  let user = JSON.parse(getCookie("user"));
+  document.getElementById("username").innerHTML = user.name;
+  document.getElementById("username1").innerHTML = user.name;
+  document.getElementById("role").innerHTML = user.role;
+});
+
 async function initializtion() {
   try {
     document.getElementById('loader').style.display = 'block';
@@ -56,11 +65,12 @@ function tab() {
               <div class="modal-dialog">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 class="modal-title">Delete Semester</h5>
+                    <h5 class="modal-title" style="font-weight:bold;">Delete Semester</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
                   <div class="modal-body text-start">
-                    <p>Are you sure you want to delete Semester "${row.name}" of "${row.course}"?</p>
+                    <p>Are you sure you want to delete Semester "${row.name}" from "${row.course}"?</p>
+                    <p>If you delete this semester then all its subjects and students will be deleted</p>
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
@@ -86,11 +96,11 @@ function validateAndAdd() {
   const errormsgcourse = document.getElementById("error-msg-course");
 
   let flag = true;
-  
+
   if (name === "") {
     errormsgname.style.display = "block";
     flag = false;
-  } 
+  }
 
   if (course === "") {
     errormsgcourse.style.display = "block";
@@ -105,7 +115,7 @@ function validateAndAdd() {
 
     document.getElementById("semesterName").value = "";
     document.getElementById("course").value = "";
-    
+
     bootstrap.Modal.getInstance(document.getElementById('basicModal')).hide();
   }
 }
@@ -139,11 +149,11 @@ function AddSemester() {
 // Delete Semester
 
 async function delSemester(id) {
-  var std = await queryByKeyValue(varStd,"semesterId",id);
+  var std = await queryByKeyValue(varStd, "semesterId", id);
   std.forEach(async (mark) => {
     delSTD(mark.id);
   });
-  var sub = await queryByKeyValue(varSub,"semesterId",id);
+  var sub = await queryByKeyValue(varSub, "semesterId", id);
   sub.forEach(async (mark) => {
     delSub(mark.id);
   });
@@ -162,4 +172,4 @@ window.dropdownOptions = dropdownOptions;
 
 initializtion();
 
-export {delSemester}
+export { delSemester }

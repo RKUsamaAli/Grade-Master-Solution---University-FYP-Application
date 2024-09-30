@@ -5,7 +5,7 @@
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
 
-  <title>Course - Grade Master Solution</title>
+  <title>Users - Grade Master Solution</title>
   <meta content="" name="description" />
   <meta content="" name="keywords" />
 
@@ -31,6 +31,7 @@
   <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
   <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <!-- Vendor CSS Files -->
   <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
   <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet" />
@@ -43,7 +44,7 @@
   <!-- Template Main CSS File -->
   <link href="assets/css/style.css" rel="stylesheet" />
   <script type="module" src="./main.js"></script>
-  <script type="module" src="./course.js"></script>
+  <script type="module" src="./user.js"></script>
 </head>
 
 <body>
@@ -69,7 +70,7 @@
           <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
             <li class="dropdown-header">
               <h6 id="username1">User Name</h6>
-              <span id="role">User Role</span>
+              <span id="role1">User Role</span>
             </li>
             <li>
               <hr class="dropdown-divider" />
@@ -167,28 +168,60 @@
             <div class="card-body">
               <div class="card-title d-flex justify-content-between align-items-center">
                 <h3>
-                  <strong>Courses</strong>
+                  <strong>Users</strong>
                 </h3>
                 <div>
                   <!-- Basic Modal -->
                   <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#basicModal">
                     <i class="bi bi-plus me-1"></i>
-                    Add Course
+                    Add User
                   </button>
                   <div class="modal fade" id="basicModal" tabindex="-1">
                     <div class="modal-dialog">
                       <div class="modal-content">
                         <div class="modal-header">
-                          <h5 class="modal-title" style="font-weight:bold;">Add Course</h5>
+                          <h5 class="modal-title" style="font-weight:bold;">Add User</h5>
                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                          <div class="row">
-                            <label for="inputText" class="col-sm-2 col-form-label">Name</label>
-                            <div class="col-sm-10">
-                              <input type="text" class="form-control" id="courseName" />
-                              <span id="error-msg" class="text-danger" style="display:none;">Please enter a course
+                          <!-- Role -->
+                          <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Role</label>
+                            <div class="col-sm-9">
+                              <select class="form-select" id="role">
+                                <option value="" disabled hidden selected>Select Role</option>
+                                <option value="Admin">Admin</option>
+                                <option value="Teacher">Teacher</option>
+                              </select>
+                              <span id="errormsgrole" class="text-danger" style="display:none;">Please select user
+                                role</span>
+                            </div>
+                          </div>
+                          <!-- User name -->
+                          <div class="row mb-3">
+                            <label for="inputText" class="col-sm-3 col-form-label">Name</label>
+                            <div class="col-sm-9">
+                              <input type="text" class="form-control" id="name" />
+                              <span id="errormsgname" class="text-danger" style="display:none;">Please enter user
                                 name</span>
+                            </div>
+                          </div>
+                          <!-- User email -->
+                          <div class="row mb-3">
+                            <label for="inputText" class="col-sm-3 col-form-label">Email</label>
+                            <div class="col-sm-9">
+                              <input type="email" class="form-control" id="email" />
+                              <span id="errormsgemail" class="text-danger" style="display:none;">Please enter user
+                                email</span>
+                            </div>
+                          </div>
+                          <!-- password -->
+                          <div class="row">
+                            <label class="col-sm-3 col-form-label">Password</label>
+                            <div class="col-sm-9">
+                              <input type="password" class="form-control" id="password" />
+                              <span id="errormsgpassword" class="text-danger" style="display:none;">Please enter
+                                password minimum 8 character</span>
                             </div>
                           </div>
                         </div>
@@ -197,21 +230,24 @@
                             Close
                           </button>
                           <button type="button" class="btn btn-primary" onclick="validateAndAdd()">
-                            Add Course
+                            Add User
                           </button>
                         </div>
                       </div>
                     </div>
                   </div>
+
                   <!-- End Basic Modal-->
                 </div>
               </div>
 
               <!-- Table with stripped rows -->
-              <table class="table" id="courseTable">
+              <table class="table" id="roleTable">
                 <thead>
                   <tr>
                     <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
                     <th class="text-end">Actions</th>
                   </tr>
                 </thead>

@@ -8,23 +8,25 @@ import {
   varMarks,
   dropdownOptions,
   varStd,
-  convertMarksToGrade
+  convertMarksToGrade,
+  getCookie
 } from "./main.js"
 var marks = [];
-let flagTab = false;
+
+let user = JSON.parse(getCookie("user"));
+document.addEventListener("DOMContentLoaded", async () => {
+  document.getElementById("username").innerHTML = user.name;
+  document.getElementById("username1").innerHTML = user.name;
+  document.getElementById("role").innerHTML = user.role;
+});
+
 async function initializtion() {
   try {
     document.getElementById('loader').style.display = 'block';
-    document.getElementById('contentSection').style.display = 'none';
+    document.getElementById('AddMarksTable').style.display = 'none';
     marks.length = 0;
     marks = await getMarks();
-
-    if (!flagTab) {
-      tab();
-      flagTab = true;
-    }
-    dataTable.clear().rows.add(marks).draw();
-    document.getElementById('contentSection').style.display = 'block';
+    document.getElementById('AddMarksTable').style.display = 'block';
     document.getElementById('loader').style.display = 'none';
     // Populate dropdown options
     dropdownOptions("course").then(() => dropdownOptions("semester").then(() => dropdownOptions('subject').then(() => showTable())));
@@ -33,26 +35,6 @@ async function initializtion() {
   } catch (error) {
     console.error("Error initializing data:", error);
   }
-}
-
-var dataTable;
-function tab() {
-  // Initialize DataTable
-  dataTable = $("#marksTable").DataTable({
-    columns: [
-      { data: "student" },
-      { data: "course" },
-      { data: "semester" },
-      { data: "subject" },
-      { data: "marks" },
-      { data: "grade" },
-    ],
-  });
-}
-
-function AddMarkSection() {
-  document.getElementById('contentSection').style.display = 'none';
-  document.getElementById('AddMarksTable').style.display = 'block';
 }
 
 async function validateAndAdd() {
@@ -119,7 +101,7 @@ async function validateAndAdd() {
 async function showTable() {
   let sem = document.getElementById("semester").value;
   let sub = document.getElementById("subject").value;
-  const tableData = await queryByKeyValue(varMarks, "semesterId", sem, "subjectId", sub);
+  const tableData = await queryByKeyValue(varMarks, "semesterId", sem, "subjectId", sub, "status", true);
   let txt = ``;
   for (let i = 0; i < tableData.length; i++) {
     await getData(`${varStd}/${tableData[i].studentId}`).then((snap) => {
@@ -175,14 +157,69 @@ async function AddMarks() {
   for (let i = 0; i < tableData.length; i++) {
     let mark = parseFloat(document.getElementById(`${tableData[i].studentId}`).value);
     let grade = convertMarksToGrade(mark);
-    updateData(`${varMarks}/${tableData[i].id}`, { marks: mark,grade: grade })
+    updateData(`${varMarks}/${tableData[i].id}`, { marks: mark, grade: grade })
   }
   document.getElementById('AddMarksTable').style.display = 'none';
   initializtion();
 }
 
+// users-separation based on role
+
+let content = ``;
+if (user.role === "Admin" || user.role === "Supreme Admin") {
+  content += `
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="user.html">
+          <i class="bi bi-person-circle"></i>
+          <span>Users</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="course.html">
+          <i class="fa-solid fa-graduation-cap"></i>
+          <span>Courses</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="semester.html">
+          <i class="bi bi-calendar3"></i>
+          <span>Semesters</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="subject.html">
+          <i class="bi bi-book"></i>
+          <span>Subjects</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="students.html">
+          <i class="bi bi-people"></i>
+          <span>Students</span>
+        </a>
+      </li>`
+}
+
+if (user.role === "Admin" || user.role === "Supreme Admin" || user.role === "Teacher") {
+  content += `<li class="nav-item">
+        <a class="nav-link collapsed" href="marks.html">
+          <i class="fa-solid fa-check"></i>
+          <span>Marks</span>
+        </a>
+      </li>`
+}
+
+content += `
+<li class="nav-item">
+  <a class="nav-link collapsed" href="users-profile.html">
+    <i class="bi bi-person"></i>
+    <span>Profile</span>
+  </a>
+</li>`
+
+document.getElementById("sidebar-nav").innerHTML = content;
+
 // Course selection in addition
-window.AddMarkSection = AddMarkSection;
 window.validateAndAdd = validateAndAdd;
 window.dropdownOptions = dropdownOptions;
 window.showTable = showTable;

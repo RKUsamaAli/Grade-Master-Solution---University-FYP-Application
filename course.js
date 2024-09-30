@@ -1,10 +1,18 @@
 import { setData, updateData, removeData, randomID, queryByKeyValue } from "./firebaseConfig.js";
 
-import { getCourses, varCour, varMarks, varSem, varStd, varSub } from "./main.js";
+import { getCourses, varCour, varSem, getCookie } from "./main.js";
 
 import { delSemester } from './semester.js'
 var courses = [];
 let flagTab = false;
+
+document.addEventListener("DOMContentLoaded", async () => {
+  let user = await JSON.parse(getCookie("user"));
+  document.getElementById("username").innerHTML = user.name;
+  document.getElementById("username1").innerHTML = user.name;
+  document.getElementById("role").innerHTML = user.role;
+});
+
 async function initializtion() {
   try {
     document.getElementById('loader').style.display = 'block';
@@ -49,7 +57,7 @@ function tab() {
               <div class="modal-dialog">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 class="modal-title">Update Course</h5>
+                    <h5 class="modal-title" style="font-weight:bold;">Update Course</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
                   <div class="modal-body">
@@ -75,11 +83,12 @@ function tab() {
               <div class="modal-dialog">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 class="modal-title">Delete Course</h5>
+                    <h5 class="modal-title" style="font-weight:bold;">Delete Course</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
                   <div class="modal-body text-start">
                     <p>Are you sure you want to delete course "${row.name}"?</p>
+                    <p>If you delete this course then all its semester, subjects and students will be deleted</p>
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
@@ -111,26 +120,9 @@ function validateAndAdd() {
   }
 }
 
-async function changestatus(id)
-{
+async function changestatus(id) {
   var status = document.getElementById(`${id}`).checked;
   updateData(`${varCour}/${id}`, { status: status });
-  var sem = await queryByKeyValue(varSem, "courseId", id);
-  sem.forEach(async (temp) => {
-    updateData(`${varSem}/${temp.id}`, { status: status });
-  });
-  var sub = await queryByKeyValue(varSub, "courseId", id);
-  sub.forEach(async (temp) => {
-    updateData(`${varSub}/${temp.id}`, { status: status });
-  });
-  var std = await queryByKeyValue(varStd, "courseId", id);
-  std.forEach(async (temp) => {
-    updateData(`${varStd}/${temp.id}`, { status: status });
-  });
-  var mark = await queryByKeyValue(varMarks, "courseId", id);
-  mark.forEach(async (temp) => {
-    updateData(`${varMarks}/${temp.id}`, { status: status });
-  });
 }
 
 // CRUD Operations
@@ -176,6 +168,10 @@ function updateCourse(rowIndex) {
     .toUpperCase();
   var oldName = courses[rowIndex].name;
 
+  if (newName == "") {
+    alert("Course name cannot be empty!");
+    return;
+  }
   if (newName !== oldName && newName !== "") {
     var index = courses.some(
       (course) => course.name.toUpperCase() === newName.toUpperCase()

@@ -47,7 +47,7 @@ h6 {
 --------------------------------------------------------------*/
 #main {
   margin-top: 51px;
-  padding: 20px 20px;
+  padding: 25px 20px 20px 25px;
   transition: all 0.3s;
 }
 
@@ -242,7 +242,7 @@ h6 {
   font-weight: 500;
   color: #012970;
   font-family: "Poppins", sans-serif;
-  
+
 }
 
 .card-title span {
@@ -983,7 +983,8 @@ h6 {
   margin: 0.25rem;
   font-size: 2.5rem;
 }
-.col-form-label{
+
+.col-form-label {
   font-size: 1rem;
 }
 
@@ -1236,6 +1237,7 @@ h6 {
   font-size: 13px;
   color: #012970;
 }
+
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;

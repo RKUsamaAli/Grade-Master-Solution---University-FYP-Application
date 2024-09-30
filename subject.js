@@ -5,9 +5,19 @@ import {
   randomID,
   queryByKeyValue
 } from "./firebaseConfig.js";
-import { getSub, varSub, dropdownOptions, varStd,varMarks } from "./main.js";
+import { getSub, varSub, dropdownOptions, varStd, getCookie, varMarks } from "./main.js";
 var subjects = [];
 let flagTab = false;
+
+document.addEventListener("DOMContentLoaded", async () => {
+  let user = JSON.parse(getCookie("user"));
+  document.getElementById("username").innerHTML = user.name;
+  document.getElementById("username1").innerHTML = user.name;
+  let x = document.getElementById("role1");
+  if (x)
+    x.innerHTML = user.role;
+});
+
 async function initializtion() {
   try {
     document.getElementById('loader').style.display = 'block';
@@ -57,7 +67,7 @@ function tab() {
             <div class="modal-dialog">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h5 class="modal-title">Update Subject</h5>
+                  <h5 class="modal-title" style="font-weight:bold;">Update Subject</h5>
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -65,7 +75,7 @@ function tab() {
                   <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Course</label>
                     <div class="col-sm-9">
-                      <select class="form-select" id="course${meta.row}" onchange="dropdownOptions('semester','${meta.row}')">
+                      <select class="form-select" id="course${meta.row}" onchange="dropdownOptions('semester','${meta.row}')" disabled>
                       </select>
                     </div>
                   </div>
@@ -73,7 +83,7 @@ function tab() {
                   <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Semester</label>
                     <div class="col-sm-9">
-                      <select class="form-select" id="semester${meta.row}">
+                      <select class="form-select" id="semester${meta.row}" disabled>
                       </select>
                     </div>
                   </div>
@@ -114,11 +124,12 @@ function tab() {
             <div class="modal-dialog">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h5 class="modal-title">Delete Subject</h5>
+                  <h5 class="modal-title" style="font-weight:bold;">Delete Subject</h5>
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-start">
                   <p>Are you sure you want to delete this subject?</p>
+                  <p>If you delete this subject then its data from students relevent to that semester will be deleted.</p>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
@@ -207,7 +218,6 @@ function validateAndAddSub() {
     document.getElementById("course").value = "";
     document.getElementById("semester").value = "";
     document.getElementById("subject").value = "";
-    document.getElementById("marks").value = "";
     document.getElementById("credit").value = "";
 
     // Hide the modal
@@ -242,7 +252,7 @@ async function AddSub() {
     var subID = randomID();
     var std = [];
     std.length = 0;
-    std = await queryByKeyValue(varStd,"semesterId",semester);
+    std = await queryByKeyValue(varStd, "semesterId", semester);
     for (let i = 0; i < std.length; i++) {
       var mark = {}
       mark.courseId = course;
@@ -274,7 +284,7 @@ async function AddSub() {
 
 // Delete Subject
 async function delSub(id) {
-  var markData = await queryByKeyValue(varMarks,"subjectId",id);
+  var markData = await queryByKeyValue(varMarks, "subjectId", id);
   markData.forEach(async (mark) => {
     await removeData(`${varMarks}/${mark.id}`);
   });
@@ -286,7 +296,7 @@ async function delSub(id) {
 }
 
 //Update Subject
-function updateSub(index,id) {
+function updateSub(index, id) {
   var name = document.getElementById(`name${index}`).value.trim();
   var marks = document.getElementById(`marks${index}`).value.trim();
   var credit = document.getElementById(`credit${index}`).value.trim();
@@ -304,8 +314,16 @@ function updateSub(index,id) {
       subject.id != id
     );
   });
+  if (name == "" || credit == "") {
+    alert("Name and credit hour fields are required.");
+    return;
+  }
   if (duplicate) {
-    alert("The subject already exists in the same course and semester.");
+    {
+      alert("The subject already exists in the same course and semester.");
+      return;
+    }
+
   } else {
     updateData(`${varSub}/${subjects[index].id}`, {
       name: name.toUpperCase(),
@@ -329,4 +347,4 @@ window.dropdownOptions = dropdownOptions;
 // Initial call
 initializtion();
 
-export {delSub}
+export { delSub }

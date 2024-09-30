@@ -4,30 +4,47 @@ import {
   removeData,
   randomID,
   queryByKeyValue,
-  getData
 } from "./firebaseConfig.js";
 import {
   getStd,
   varStd,
   varSub,
   varMarks,
+  varUser,
   dropdownOptions,
-  gradeToGPA
+  getCookie,
+  calculateGPA,
+  getUsers
 } from "./main.js";
 
 var students = [];
 var subjects = [];
+var users = [];
 let flagTab = false;
+
+document.addEventListener("DOMContentLoaded", async () => {
+  let user = JSON.parse(getCookie("user"));
+  document.getElementById("username").innerHTML = user.name;
+  document.getElementById("username1").innerHTML = user.name;
+  let x = document.getElementById("userrole");
+  if (x) {
+    x.innerHTML = user.role
+  }
+});
+
 async function initializtion() {
   try {
     document.getElementById('loader').style.display = 'block';
     document.getElementById('contentSection').style.display = 'none';
     students.length = 0;
     students = await getStd();
+    users.length = 0;
+    users = await getUsers();
 
     // calculate gpa
     for (let i = 0; i < students.length; i++) {
-      students[i].gpa = await calculateGPA(students[i].id);
+      students[i].gpa = await calculateGPA(students[i].id, true);
+      students[i].cgpa = await calculateGPA(students[i].id, false);
     }
 
     if (!flagTab) {
@@ -51,9 +68,11 @@ function tab() {
     columns: [
       { title: "Roll No", data: "rollNo" },
       { title: "Name", data: "name" },
+      { title: "Email", data: "email" },
       { title: "Course", data: "course" },
       { title: "Semester", data: "semester" },
       { title: "GPA", data: "gpa" },
+      { title: "CGPA", data: "cgpa" },
       { title: "DOB", data: "dob" },
       {
         data: null,
@@ -65,14 +84,14 @@ function tab() {
           let txt = `
             <div class="text-end">
           <!-- Edit Student -->
-          <a onclick="dropdownOptions('course','${meta.row}','${data.course}'); dropdownOptions('semester','${meta.row}','${data.semester}')" data-bs-toggle="modal" data-bs-target="#${updateMID}" style="margin-right: 10px;">
-            <i class="fa-solid fa-pencil fa-lg" style="color: #0f54ae;"></i>
-          </a>
+          <a onclick="dropdownOptions('course', '${meta.row}', '${data.course}').then(() => dropdownOptions('semester', '${meta.row}', '${data.semester}'))"
+            data-bs-toggle="modal" data-bs-target="#${updateMID}" style="margin-right: 10px;">
+            <i class="fa-solid fa-pencil fa-lg" style="color: #0f54ae;"></i></a>
           <div class="modal fade" id="${updateMID}" tabindex="-1">
             <div class="modal-dialog">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h5 class="modal-title">Update Subject</h5>
+                  <h5 class="modal-title" style="font-weight:bold;"><b>Update Student</b></h5>
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -80,7 +99,7 @@ function tab() {
                   <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Course</label>
                     <div class="col-sm-9">
-                      <select class="form-select" id="course${meta.row}" onchange="dropdownOptions('semester','${meta.row}')">
+                      <select class="form-select" id="course${meta.row}" disabled>
                       </select>
                     </div>
                   </div>
@@ -103,7 +122,21 @@ function tab() {
                   <div class="row mb-3">
                     <label for="inputText" class="col-sm-3 col-form-label">Name</label>
                     <div class="col-sm-9">
-                      <input type="text" class="form-control" id="name${meta.row}" value="${data.name}" />
+                      <input type="text" class="form-control" id="name${meta.row}" value="${data.name}" required />
+                    </div>
+                  </div>
+                  <!-- Email -->
+                  <div class="row mb-3">
+                    <label for="inputText" class="col-sm-3 col-form-label">Email</label>
+                    <div class="col-sm-9">
+                      <input type="email" class="form-control" id="email${meta.row}" value="${data.email}" required />
+                    </div>
+                  </div>
+                  <!-- Name -->
+                  <div class="row mb-3">
+                    <label for="inputText" class="col-sm-3 col-form-label">Password</label>
+                    <div class="col-sm-9">
+                      <input type="password" class="form-control" id="password${meta.row}" value="" required />
                     </div>
                   </div>
                   <!-- DOB -->
@@ -116,7 +149,7 @@ function tab() {
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                  <button type="button" class="btn btn-primary" onclick="updateSTD('${meta.row}')" data-bs-dismiss="modal">Update</button>
+                  <button type="button" class="btn btn-primary" onclick="updateSTD('${meta.row}','${data.id}')" data-bs-dismiss="modal">Update</button>
                 </div>
               </div>
             </div>
@@ -129,11 +162,12 @@ function tab() {
             <div class="modal-dialog">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h5 class="modal-title">Delete Student</h5>
+                  <h5 class="modal-title" style="font-weight:bold;">Delete Student</h5>
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-start">
                   <p>Are you sure you want to delete this Student?</p>
+                  <p>If you delete this student then all its data will be deleted permanently.</p>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
@@ -157,12 +191,16 @@ function validateAndAdd() {
   var name = document.getElementById("name").value.trim();
   var dob = document.getElementById("dob").value.trim();
   var rollNo = document.getElementById("rollNo").value.trim();
+  var email = document.getElementById("email").value.trim();
+  var password = document.getElementById("password").value.trim();
 
   const errormsgcourse = document.getElementById("errormsgcourse");
   const errormsgsem = document.getElementById("errormsgsem");
   const errormsgname = document.getElementById("errormsgname");
   const errormsgdob = document.getElementById("errormsgdob");
   const errormsgrollno = document.getElementById("errormsgrollno");
+  const errormsgemail = document.getElementById("errormsgemail");
+  const errormsgpassword = document.getElementById("errormsgpassword");
 
   let flag = true;
 
@@ -186,11 +224,30 @@ function validateAndAdd() {
   } else {
     errormsgrollno.style.display = "none";
   }
+
   if (name === "") {
     errormsgname.style.display = "block";
     flag = false;
   } else {
     errormsgname.style.display = "none";
+  }
+
+  if (email === "") {
+    errormsgemail.style.display = "block";
+    flag = false;
+  } else if (!email.endsWith("@gmail.com")) {
+    errormsgemail.style.display = "block";
+    errormsgemail.textContent = "Email must end with @gmail.com";
+    flag = false;
+  } else {
+    errormsgemail.style.display = "none";
+  }
+
+  if (password === "") {
+    errormsgpassword.style.display = "block";
+    flag = false;
+  } else {
+    errormsgpassword.style.display = "none";
   }
 
   if (dob === "") {
@@ -205,16 +262,11 @@ function validateAndAdd() {
     errormsgsem.style.display = "none";
     errormsgname.style.display = "none";
     errormsgdob.style.display = "none";
+    errormsgrollno.style.display = "none";
+    errormsgemail.style.display = "none";
+    errormsgpassword.style.display = "none";
 
     Addstd();
-
-    document.getElementById("course").value = "";
-    document.getElementById("semester").value = "";
-    document.getElementById("name").value = "";
-    document.getElementById("dob").value = "";
-    document.getElementById("rollNo").value = "";
-
-    bootstrap.Modal.getInstance(document.getElementById('basicModal')).hide();
   }
 }
 
@@ -229,15 +281,48 @@ async function Addstd() {
   std.semesterId = document.getElementById("semester").value;
   std.dob = document.getElementById("dob").value;
   std.rollNo = document.getElementById("rollNo").value;
+  std.email = document.getElementById("email").value;
   std.status = true;
+  let password = document.getElementById("password").value;
+  var user = {};
+  user.role = "Student";
+  user.name = std.name;
+  user.email = std.email;
+  user.password = CryptoJS.SHA256(password).toString();
 
+  let flag = true;
   var duplicate = students.some(function (object) {
     return (
       object.rollNo === std.rollNo
     );
   });
-  if (duplicate) alert("Student already exists!");
+  // Check for duplicate email
+  var duplicate1 = users.some(function (object) {
+    return object.email === std.email;
+  });
+  if (duplicate) {
+    document.getElementById("errormsgrollno").style.display = "block";
+    document.getElementById("errormsgrollno").textContent = "User with this roll no already exists!";
+    flag = false;
+  }
+  else if (duplicate1) {
+    document.getElementById("errormsgemail").style.display = "block";
+    document.getElementById("errormsgemail").textContent = "User with this email already exists!";
+    flag = false;
+  }
+
   else {
+    if (flag) {
+      document.getElementById("course").value = "";
+      document.getElementById("semester").value = "";
+      document.getElementById("name").value = "";
+      document.getElementById("dob").value = "";
+      document.getElementById("rollNo").value = "";
+      document.getElementById("email").value = "";
+      document.getElementById("password").value = "";
+
+      bootstrap.Modal.getInstance(document.getElementById('basicModal')).hide();
+    }
     var stdID = randomID();
     subjects.length = 0;
     subjects = await queryByKeyValue(varSub, "semesterId", std.semesterId);
@@ -251,15 +336,18 @@ async function Addstd() {
       mark.totalMarks = subjects[i].marks;
       mark.status = true;
       mark.grade = 'F';
-      setData(`${varMarks}/${randomID()}`, mark);
+      await setData(`${varMarks}/${randomID()}`, mark);
     }
-    setData(`${varStd}/${stdID}`, std)
+    await setData(`${varStd}/${stdID}`, std)
+    users.studentId = stdID;
+    await setData(`${varUser}/${stdID}`, user)
       .then(() => {
         initializtion();
       })
       .catch((error) => {
         console.error("Error:", error);
       });
+
   }
 }
 
@@ -268,21 +356,25 @@ async function delSTD(index) {
   markData.forEach(async (mark) => {
     await removeData(`${varMarks}/${mark.id}`);
   });
-  removeData(`${varStd}/${index}`)
+  await removeData(`${varStd}/${index}`);
+  await removeData(`${varUser}/${index}`)
     .then(() => {
       initializtion();
     })
     .catch((error) => console.error("Error deleting student:", error));
 }
 
-function updateSTD(index) {
+async function updateSTD(index, id) {
   var std = {};
   std.name = document.getElementById(`name${index}`).value.toUpperCase();
   std.courseId = document.getElementById(`course${index}`).value;
   std.semesterId = document.getElementById(`semester${index}`).value;
   std.dob = document.getElementById(`dob${index}`).value;
   std.rollNo = document.getElementById(`rollNo${index}`).value;
+  std.email = document.getElementById(`email${index}`).value;
+  std.rollNo = document.getElementById(`rollNo${index}`).value;
 
+  let password = document.getElementById(`password${index}`).value;
   var duplicate = students.some(function (object) {
     return (
       object.name === std.name &&
@@ -292,38 +384,53 @@ function updateSTD(index) {
     );
   });
   if (duplicate) alert("Student already exists!");
+  else if (std.name === "" || std.email === "") { alert("Name and Email is required"); }
   else {
-
+    let preSTD = students.find((temp) => {
+      return temp.id == id;
+    })
+    let marks1 = await queryByKeyValue(varMarks, "studentId", id, "semesterId", preSTD.semesterId);
+    marks1.forEach(async (mark) => {
+      await updateData(`${varMarks}/${mark.id}`, { status: false });
+    });
+    if (preSTD.semesterId != std.semesterId) {
+      console.log("Semester changed");
+      let marks_ = await queryByKeyValue(varMarks, "studentId", id, "semesterId", std.semesterId)
+      if (marks_.length == 0) {
+        console.log("No marks found")
+        var subjects_ = [];
+        subjects_.length = 0;
+        subjects_ = await queryByKeyValue(varSub, "semesterId", std.semesterId);
+        for (let i = 0; i < subjects_.length; i++) {
+          var mark = {}
+          mark.courseId = std.courseId;
+          mark.semesterId = std.semesterId;
+          mark.subjectId = subjects_[i].id;
+          mark.studentId = id;
+          mark.marks = 0;
+          mark.totalMarks = subjects_[i].marks;
+          mark.status = true;
+          mark.grade = 'F';
+          setData(`${varMarks}/${randomID()}`, mark);
+        }
+      }
+      else {
+        marks_.forEach(async (mark) => {
+          await updateData(`${varMarks}/${mark.id}`, { status: true });
+        });
+      }
+    }
+    if (students)
+      await updateData(`${varUser}/${id}`, { email: std.email, name: std.name });
+    if (password !== "") {
+      await updateData(`${varUser}/${id}`, { password: CryptoJS.SHA256(password).toString() });
+    }
     updateData(`${varStd}/${students[index].id}`, std)
       .then(() => {
         initializtion();
       })
       .catch((error) => console.error("Error updating student:", error));
   }
-}
-
-async function calculateGPA(id) {
-  const STD_subject = await queryByKeyValue(varMarks, "studentId", id);
-
-  // Add credit hour in subjects
-  for (let i = 0; i < STD_subject.length; i++) {
-    await getData(`${varSub}/${STD_subject[i].subjectId}`).then((subSnap) => {
-      if (subSnap.exists()) {
-        const sub = subSnap.val();
-        STD_subject[i].credit = sub.credit;
-      }
-    });
-  }
-
-  let totalCredits = 0;
-  let totalPoints = 0;
-
-  for (let item of STD_subject) {
-    const gpaValue = gradeToGPA(item.grade);
-    totalCredits += parseFloat(item.credit);
-    totalPoints += gpaValue * item.credit;    
-  }
-  return totalPoints / totalCredits;
 }
 
 window.validateAndAdd = validateAndAdd;
@@ -333,4 +440,4 @@ window.dropdownOptions = dropdownOptions;
 // Initial call
 initializtion();
 
-export { delSTD }
+export { delSTD, calculateGPA }

@@ -28,7 +28,6 @@ const firebaseConfig = {
   appId: "1:389633784942:web:f3112504d1bd3a2623fa7f",
   measurementId: "G-V19XYLXY32",
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
@@ -65,15 +64,12 @@ function randomID(length = 10) {
   return result;
 }
 
-async function queryByKeyValue(nodePath, key1 = null, value1 = null, key2 = null, value2 = null) {
+async function queryByKeyValue(nodePath, key1 = null, value1 = null, key2 = null, value2 = null, key3 = null, value3 = null) {
   try {
     const dbRef = ref(db, nodePath);
     let queryRef;
 
-    // If both key1 and key2 are provided
-    if (key1 && value1 && key2 && value2) {
-      queryRef = query(dbRef, orderByChild(key1), equalTo(value1));
-    } else if (key1 && value1) {
+    if (key1 && value1) {
       queryRef = query(dbRef, orderByChild(key1), equalTo(value1));
     } else {
       queryRef = dbRef;
@@ -85,13 +81,24 @@ async function queryByKeyValue(nodePath, key1 = null, value1 = null, key2 = null
       const data = snapshot.val();
       const rows = [];
 
-      // Filter the results further based on the second key-value pair
       for (const [id, item] of Object.entries(data)) {
-        if (!key2 || item[key2] === value2) {
+        let matchesKey2 = true;
+        let matchesKey3 = true;
+
+        if (key2 && value2) {
+          matchesKey2 = item[key2] === value2;
+        }
+
+        if (key3 && value3) {
+          matchesKey3 = item[key3] === value3;
+        }
+
+        if (matchesKey2 && matchesKey3) {
           item.id = id;
           rows.push(item);
         }
       }
+
       return rows;
     } else {
       console.log("No data available for the given query.");
@@ -103,30 +110,11 @@ async function queryByKeyValue(nodePath, key1 = null, value1 = null, key2 = null
   }
 }
 
-function checkUserAuthentication(callback) {
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      callback(true, user);
-    } else {
-      callback(false);
-    }
-  });
-}
-
-function signOutUser() {
-  return signOut(auth);
-}
-
 export {
   setData,
   getData,
   updateData,
   removeData,
   randomID,
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  checkUserAuthentication,
-  signOutUser,
   queryByKeyValue
 };
