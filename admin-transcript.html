@@ -5,13 +5,13 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
 
-    <title>Profile - Grade Master Solution</title>
+    <title>Admin Transcript - Grade Master Solution</title>
     <meta content="" name="description" />
     <meta content="" name="keywords" />
 
     <!-- Favicons -->
     <link href="assets/img/favicon.png" rel="icon" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
     <!-- Google Fonts -->
     <link href="https://fonts.gstatic.com" rel="preconnect" />
@@ -25,13 +25,12 @@
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <!-- DataTables -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap5.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap5.min.css">
 
     <!-- DataTables -->
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <!-- Vendor CSS Files -->
     <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
     <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet" />
@@ -44,8 +43,7 @@
     <!-- Template Main CSS File -->
     <link href="assets/css/style.css" rel="stylesheet" />
     <script type="module" src="./main.js"></script>
-    <script type="module" src="./transcript.js"></script>
-
+    <script type="module" src="./admin-transcript.js"></script>
 </head>
 
 <body>
@@ -108,42 +106,59 @@
         </ul>
     </aside>
     <!-- End Sidebar-->
+
     <main id="main" class="main">
+        <!-- Add Marks -->
+        <section id="AddMarksTable" style="display: none;">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h2 class="card-title">
+                                Transcript
+                            </h2>
+                            <div class="row">
+                                <!-- course -->
+                                <div class="col-md-4">
+                                    <select class="col-md-6 form-select" id="course"
+                                        onchange="dropdownOptions('semester').then(() => dropdownOptions('student').then(()=> showTable()))">
+                                    </select>
+                                </div>
+                                <!-- Semester -->
+                                <div class="col-md-4">
+                                    <select class="form-select" id="semester"
+                                        onfocus="dropdownOptions('student').then(()=> showTable())"
+                                        onchange="dropdownOptions('student').then(()=> showTable())">
+                                    </select>
+                                </div>
+                                <!-- subject -->
+                                <div class="col-md-4">
+                                    <select class="form-select" id="student" onchange="showTable()">
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="stdDetail"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </section>
         <!-- Loader -->
         <div id="loader">
-            <div class="d-flex justify-content-center align-items-center" style="height: 77vh;">
+            <div class="d-flex justify-content-center align-items-center" style="height: 52vh;">
                 <div class="spinner-border" style="width: 40px; height: 40px;" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
             </div>
         </div>
-        <div id="contentSection" style="display: none;">
-            <div class="d-flex justify-content-between">
-                <div class="pagetitle">
-                    <h1>Transcript</h1>
-                    <nav>
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-                            <li class="breadcrumb-item">Student</li>
-                            <li class="breadcrumb-item active">Transcript</li>
-                        </ol>
-                    </nav>
-                </div>
-                <div class="pagetitle" style="color: black;">
-                    <h1 id="courseName"></h1>
-                    <nav>
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item" id="CGPA"></li>
-                        </ol>
-                    </nav>
-                </div>
+        <section class="section" id="semeterLoader">
+            <div class="row" id="semesterGPA">
             </div>
-            <section class="section">
-                <div class="row" id="semesterGPA">
-                </div>
-            </section>
-        </div>
+        </section>
+
     </main>
+    <!-- End #main -->
 
     <!-- ======= Footer ======= -->
     <footer id="footer" class="footer">
@@ -165,10 +180,8 @@
     <script src="assets/vendor/simple-datatables/simple-datatables.js"></script>
     <script src="assets/vendor/tinymce/tinymce.min.js"></script>
     <script src="assets/vendor/php-email-form/validate.js"></script>
-
     <!-- Template Main JS File -->
     <script src="assets/js/main.js"></script>
-
 </body>
 
 </html>

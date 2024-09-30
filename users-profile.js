@@ -70,6 +70,14 @@ if (user.role === "Student") {
       </a>
     </li>`
 }
+if (user.role === "Admin" || user.role === "Supreme Admin") {
+  content += `<li class="nav-item">
+      <a class="nav-link collapsed" href="admin-transcript.html">
+        <i class="fa-regular fa-file"></i>
+        <span>Transcript</span>
+      </a>
+    </li>`
+}
 
 content += `
 <li class="nav-item">

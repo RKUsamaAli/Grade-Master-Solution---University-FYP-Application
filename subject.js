@@ -9,8 +9,8 @@ import { getSub, varSub, dropdownOptions, varStd, getCookie, varMarks } from "./
 var subjects = [];
 let flagTab = false;
 
+let user = JSON.parse(getCookie("user"));
 document.addEventListener("DOMContentLoaded", async () => {
-  let user = JSON.parse(getCookie("user"));
   document.getElementById("username").innerHTML = user.name;
   document.getElementById("username1").innerHTML = user.name;
   let x = document.getElementById("role1");
@@ -338,7 +338,14 @@ function updateSub(index, id) {
       .catch((error) => console.error("Error updating course:", error));
   }
 }
-
+if (user.role === "Admin" || user.role === "Supreme Admin") {
+  document.getElementById("showTranscript").innerHTML = `<li class="nav-item">
+      <a class="nav-link collapsed" href="admin-transcript.html">
+        <i class="fa-regular fa-file"></i>
+        <span>Transcript</span>
+      </a>
+    </li>`
+}
 window.delSub = delSub;
 window.updateSub = updateSub;
 window.validateAndAddSub = validateAndAddSub;

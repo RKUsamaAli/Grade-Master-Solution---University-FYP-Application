@@ -4,14 +4,12 @@ import {
   queryByKeyValue
 } from "./firebaseConfig.js";
 import {
-  getMarks,
   varMarks,
   dropdownOptions,
   varStd,
   convertMarksToGrade,
   getCookie
 } from "./main.js"
-var marks = [];
 
 let user = JSON.parse(getCookie("user"));
 document.addEventListener("DOMContentLoaded", async () => {
@@ -24,8 +22,6 @@ async function initializtion() {
   try {
     document.getElementById('loader').style.display = 'block';
     document.getElementById('AddMarksTable').style.display = 'none';
-    marks.length = 0;
-    marks = await getMarks();
     document.getElementById('AddMarksTable').style.display = 'block';
     document.getElementById('loader').style.display = 'none';
     // Populate dropdown options
@@ -207,6 +203,15 @@ if (user.role === "Admin" || user.role === "Supreme Admin" || user.role === "Tea
           <span>Marks</span>
         </a>
       </li>`
+}
+
+if (user.role === "Admin" || user.role === "Supreme Admin") {
+  content += `<li class="nav-item">
+      <a class="nav-link collapsed" href="admin-transcript.html">
+        <i class="fa-regular fa-file"></i>
+        <span>Transcript</span>
+      </a>
+    </li>`
 }
 
 content += `

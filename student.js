@@ -22,8 +22,8 @@ var subjects = [];
 var users = [];
 let flagTab = false;
 
+let user = JSON.parse(getCookie("user"));
 document.addEventListener("DOMContentLoaded", async () => {
-  let user = JSON.parse(getCookie("user"));
   document.getElementById("username").innerHTML = user.name;
   document.getElementById("username1").innerHTML = user.name;
   let x = document.getElementById("userrole");
@@ -431,6 +431,15 @@ async function updateSTD(index, id) {
       })
       .catch((error) => console.error("Error updating student:", error));
   }
+}
+
+if (user.role === "Admin" || user.role === "Supreme Admin") {
+  document.getElementById("showTranscript").innerHTML = `<li class="nav-item">
+      <a class="nav-link collapsed" href="admin-transcript.html">
+        <i class="fa-regular fa-file"></i>
+        <span>Transcript</span>
+      </a>
+    </li>`
 }
 
 window.validateAndAdd = validateAndAdd;

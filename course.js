@@ -6,8 +6,8 @@ import { delSemester } from './semester.js'
 var courses = [];
 let flagTab = false;
 
+let user = await JSON.parse(getCookie("user"));
 document.addEventListener("DOMContentLoaded", async () => {
-  let user = await JSON.parse(getCookie("user"));
   document.getElementById("username").innerHTML = user.name;
   document.getElementById("username1").innerHTML = user.name;
   document.getElementById("role").innerHTML = user.role;
@@ -189,6 +189,14 @@ function updateCourse(rowIndex) {
   }
 }
 
+if (user.role === "Admin" || user.role === "Supreme Admin") {
+  document.getElementById("showTranscript").innerHTML = `<li class="nav-item">
+      <a class="nav-link collapsed" href="admin-transcript.html">
+        <i class="fa-regular fa-file"></i>
+        <span>Transcript</span>
+      </a>
+    </li>`
+}
 // Expose functions to global scope
 window.validateAndAdd = validateAndAdd;
 window.delCourse = delCourse;

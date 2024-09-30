@@ -372,7 +372,8 @@ async function dropdownOptions(id, index = "", selected = "") {
 
     case 'student':
       const semester1 = document.getElementById(`semester${index}`).value;
-      array = await queryByKeyValue(varStd, "semesterId", semester1, "status", true);
+      if (semester1 != "")
+        array = await queryByKeyValue(varStd, "semesterId", semester1);
       break;
 
     default:

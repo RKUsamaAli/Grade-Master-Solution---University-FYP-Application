@@ -5,8 +5,8 @@ import { delSTD } from "./student.js";
 var users = [];
 let flagTab = false;
 
+let user = JSON.parse(getCookie("user"));
 document.addEventListener("DOMContentLoaded", async () => {
-  let user = JSON.parse(getCookie("user"));
   document.getElementById("username").innerHTML = user.name;
   document.getElementById("username1").innerHTML = user.name;
   document.getElementById("role1").innerHTML = user.role;
@@ -308,6 +308,15 @@ async function delUser(id) {
   else {
     alert("Supreme Admin can't be deleted!!!");
   }
+}
+
+if (user.role === "Admin" || user.role === "Supreme Admin") {
+  document.getElementById("showTranscript").innerHTML = `<li class="nav-item">
+      <a class="nav-link collapsed" href="admin-transcript.html">
+        <i class="fa-regular fa-file"></i>
+        <span>Transcript</span>
+      </a>
+    </li>`
 }
 
 // Expose functions to global scope
