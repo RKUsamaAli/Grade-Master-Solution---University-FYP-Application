@@ -5,13 +5,13 @@
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
 
-  <title>Students - Grade Master Solution</title>
+  <title>Users - Grade Master Solution</title>
   <meta content="" name="description" />
   <meta content="" name="keywords" />
 
   <!-- Favicons -->
   <link href="assets/img/favicon.png" rel="icon" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" />
 
   <!-- Google Fonts -->
   <link href="https://fonts.gstatic.com" rel="preconnect" />
@@ -25,7 +25,7 @@
     crossorigin="anonymous" referrerpolicy="no-referrer" />
 
   <!-- DataTables -->
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap5.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap5.min.css" />
 
   <!-- DataTables -->
   <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
@@ -43,15 +43,8 @@
 
   <!-- Template Main CSS File -->
   <link href="assets/css/style.css" rel="stylesheet" />
-
-  <style>
-    .table th:nth-child(9),
-    .table td:nth-child(9) {
-      width: 10%;
-      /* Adjust the percentage as needed */
-    }
-  </style>
   <script type="module" src="./main.js"></script>
+  <script type="module" src="./user.js"></script>
 </head>
 
 <body>
@@ -77,7 +70,7 @@
           <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
             <li class="dropdown-header">
               <h6 id="username1">User Name</h6>
-              <span id="userrole">User Role</span>
+              <span id="role1">User Role</span>
             </li>
             <li>
               <hr class="dropdown-divider" />
@@ -93,7 +86,7 @@
               <hr class="dropdown-divider" />
             </li>
             <li>
-              <a class="dropdown-item d-flex align-items-center" href="#" id="logout">
+              <a class="dropdown-item d-flex align-items-center" id="logout" href="/login.html">
                 <i class="bi bi-box-arrow-right"></i>
                 <span>Sign Out</span>
               </a>
@@ -108,6 +101,7 @@
   </header>
   <!-- End Header -->
 
+  <!-- ======= Sidebar ======= -->
   <aside id="sidebar" class="sidebar">
     <ul class="sidebar-nav" id="sidebar-nav">
       <li class="nav-item">
@@ -175,84 +169,60 @@
             <div class="card-body">
               <div class="card-title d-flex justify-content-between align-items-center">
                 <h3>
-                  <strong>Students</strong>
+                  <strong>Users</strong>
                 </h3>
                 <div>
                   <!-- Basic Modal -->
                   <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#basicModal">
                     <i class="bi bi-plus me-1"></i>
-                    Add Student
+                    Add User
                   </button>
                   <div class="modal fade" id="basicModal" tabindex="-1">
                     <div class="modal-dialog">
                       <div class="modal-content">
                         <div class="modal-header">
-                          <h5 class="modal-title" style="font-weight:bold;">Add Student</h5>
+                          <h5 class="modal-title" style="font-weight:bold;">Add User</h5>
                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                          <!-- course -->
+                          <!-- Role -->
                           <div class="row mb-3">
-                            <label class="col-sm-3 col-form-label">Course</label>
+                            <label class="col-sm-3 col-form-label">Role</label>
                             <div class="col-sm-9">
-                              <select class="form-select" id="course" onfocus="dropdownOptions('semester')"
-                                onchange="dropdownOptions('semester')">
+                              <select class="form-select" id="role">
+                                <option value="" disabled hidden selected>Select Role</option>
+                                <option value="Admin">Admin</option>
+                                <option value="Teacher">Teacher</option>
                               </select>
-                              <span id="errormsgcourse" class="text-danger" style="display:none;">Please select
-                                course</span>
+                              <span id="errormsgrole" class="text-danger" style="display:none;">Please select user
+                                role</span>
                             </div>
                           </div>
-                          <!-- Semester -->
-                          <div class="row mb-3">
-                            <label class="col-sm-3 col-form-label">Semester</label>
-                            <div class="col-sm-9">
-                              <select class="form-select" id="semester">
-                              </select>
-                              <span id="errormsgsem" class="text-danger" style="display:none;">Please select
-                                Semester</span>
-                            </div>
-                          </div>
-                          <!--ID -->
-                          <div class="row mb-3">
-                            <label for="inputText" class="col-sm-3 col-form-label">Roll No</label>
-                            <div class="col-sm-9">
-                              <input type="text" class="form-control" id="rollNo" />
-                              <span id="errormsgrollno" class="text-danger" style="display:none;">Please enter student
-                                Roll no</span>
-                            </div>
-                          </div>
-                          <!--Name -->
+                          <!-- User name -->
                           <div class="row mb-3">
                             <label for="inputText" class="col-sm-3 col-form-label">Name</label>
                             <div class="col-sm-9">
                               <input type="text" class="form-control" id="name" />
-                              <span id="errormsgname" class="text-danger" style="display:none;">Please enter student
+                              <span id="errormsgname" class="text-danger" style="display:none;">Please enter user
                                 name</span>
                             </div>
                           </div>
-                          <!--Email -->
+                          <!-- User email -->
                           <div class="row mb-3">
                             <label for="inputText" class="col-sm-3 col-form-label">Email</label>
                             <div class="col-sm-9">
                               <input type="email" class="form-control" id="email" />
-                              <span id="errormsgemail" class="text-danger" style="display:none;">Please enter student
-                                Email</span>
+                              <span id="errormsgemail" class="text-danger" style="display:none;">Please enter user
+                                email</span>
                             </div>
                           </div>
-                          <!--Password -->
-                          <div class="row mb-3">
-                            <label for="inputText" class="col-sm-3 col-form-label">Password</label>
+                          <!-- password -->
+                          <div class="row">
+                            <label class="col-sm-3 col-form-label">Password</label>
                             <div class="col-sm-9">
                               <input type="password" class="form-control" id="password" />
-                              <span id="errormsgpassword" class="text-danger" style="display:none;">Please enter student
-                                password</span>
-                            </div>
-                          </div>
-                          <div class="row mb-3">
-                            <label for="inputDate" class="col-sm-3 col-form-label">DOB</label>
-                            <div class="col-sm-9">
-                              <input type="date" id="dob" class="form-control">
-                              <span id="errormsgdob" class="text-danger" style="display:none;">Please enter DOB</span>
+                              <span id="errormsgpassword" class="text-danger" style="display:none;">Please enter
+                                password minimum 8 character</span>
                             </div>
                           </div>
                         </div>
@@ -261,34 +231,30 @@
                             Close
                           </button>
                           <button type="button" class="btn btn-primary" onclick="validateAndAdd()">
-                            Add Student
+                            Add User
                           </button>
                         </div>
                       </div>
                     </div>
                   </div>
+
                   <!-- End Basic Modal-->
                 </div>
               </div>
 
               <!-- Table with stripped rows -->
-              <table class="table" id="stdTable">
+              <table class="table" id="roleTable">
                 <thead>
                   <tr>
-                    <th>Roll No</th>
                     <th>Name</th>
                     <th>Email</th>
-                    <th>Course</th>
-                    <th>Semester</th>
-                    <th>GPA</th>
-                    <th>CGPA</th>
-                    <th data-type="date" data-format="YYYY/DD/MM">DOB</th>
+                    <th>Role</th>
                     <th class="text-end">Actions</th>
                   </tr>
                 </thead>
-                <tbody id="tBody">
-                </tbody>
+                <tbody id="tbody"></tbody>
               </table>
+              <!-- End Table with stripped rows -->
             </div>
           </div>
         </div>
@@ -320,7 +286,6 @@
 
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
-  <script type="module" src="student.js"> </script>
 
 </body>
 

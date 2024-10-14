@@ -3,21 +3,50 @@ import {
   updateData,
   removeData,
   randomID,
+  queryByKeyValue,
 } from "./firebaseConfig.js";
 import {
   getStd,
   varStd,
-  dropdownOptions
+  varSub,
+  varMarks,
+  varUser,
+  dropdownOptions,
+  getCookie,
+  calculateGPA,
+  getUsers
 } from "./main.js";
 
 var students = [];
+var subjects = [];
+var users = [];
 let flagTab = false;
+
+let user = JSON.parse(getCookie("user"));
+document.addEventListener("DOMContentLoaded", async () => {
+  document.getElementById("username").innerHTML = user.name;
+  document.getElementById("username1").innerHTML = user.name;
+  let x = document.getElementById("userrole");
+  if (x) {
+    x.innerHTML = user.role
+  }
+});
+
 async function initializtion() {
   try {
     document.getElementById('loader').style.display = 'block';
     document.getElementById('contentSection').style.display = 'none';
     students.length = 0;
     students = await getStd();
+    users.length = 0;
+    users = await getUsers();
+
+    // calculate gpa
+    for (let i = 0; i < students.length; i++) {
+      students[i].gpa = await calculateGPA(students[i].id, true);
+      students[i].cgpa = await calculateGPA(students[i].id, false);
+    }
+
     if (!flagTab) {
       tab();
       flagTab = true;
@@ -37,9 +66,12 @@ function tab() {
   // Initialize DataTable
   dataTable = $("#stdTable").DataTable({
     columns: [
+      { title: "Roll No", data: "rollNo" },
       { title: "Name", data: "name" },
+      { title: "Email", data: "email" },
       { title: "Course", data: "course" },
       { title: "Semester", data: "semester" },
+      { title: "GPA", data: "gpa" },
       { title: "CGPA", data: "cgpa" },
       { title: "DOB", data: "dob" },
       {
@@ -52,14 +84,14 @@ function tab() {
           let txt = `
             <div class="text-end">
           <!-- Edit Student -->
-          <a onclick="dropdownOptions('course','${meta.row}','${data.course}'); dropdownOptions('semester','${meta.row}','${data.semester}')" data-bs-toggle="modal" data-bs-target="#${updateMID}" style="margin-right: 10px;">
-            <i class="fa-solid fa-pencil fa-lg" style="color: #0f54ae;"></i>
-          </a>
+          <a onclick="dropdownOptions('course', '${meta.row}', '${data.course}').then(() => dropdownOptions('semester', '${meta.row}', '${data.semester}'))"
+            data-bs-toggle="modal" data-bs-target="#${updateMID}" style="margin-right: 10px;">
+            <i class="fa-solid fa-pencil fa-lg" style="color: #0f54ae;"></i></a>
           <div class="modal fade" id="${updateMID}" tabindex="-1">
             <div class="modal-dialog">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h5 class="modal-title">Update Subject</h5>
+                  <h5 class="modal-title" style="font-weight:bold;"><b>Update Student</b></h5>
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -67,7 +99,7 @@ function tab() {
                   <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Course</label>
                     <div class="col-sm-9">
-                      <select class="form-select" id="course${meta.row}" onchange="dropdownOptions('semester','${meta.row}')">
+                      <select class="form-select" id="course${meta.row}" disabled>
                       </select>
                     </div>
                   </div>
@@ -79,20 +111,35 @@ function tab() {
                       </select>
                     </div>
                   </div>
-                  <!-- First Name -->
+                  <!-- Roll No -->
+                  <div class="row mb-3">
+                    <label for="inputText" class="col-sm-3 col-form-label">Roll No</label>
+                    <div class="col-sm-9">
+                      <input type="text" class="form-control" id="rollNo${meta.row}" value="${data.rollNo}" disabled />
+                    </div>
+                  </div>
+                  <!-- Name -->
                   <div class="row mb-3">
                     <label for="inputText" class="col-sm-3 col-form-label">Name</label>
                     <div class="col-sm-9">
-                      <input type="text" class="form-control" id="name${meta.row}" value="${data.name}" />
+                      <input type="text" class="form-control" id="name${meta.row}" value="${data.name}" required />
                     </div>
                   </div>
-                  <!-- cgpa -->
+                  <!-- Email -->
                   <div class="row mb-3">
-                    <label for="inputText" class="col-sm-3 col-form-label">CGPA</label>
+                    <label for="inputText" class="col-sm-3 col-form-label">Email</label>
                     <div class="col-sm-9">
-                      <input type="number" class="form-control" id="cgpa${meta.row}" value="${data.cgpa}" />
+                      <input type="email" class="form-control" id="email${meta.row}" value="${data.email}" required />
                     </div>
                   </div>
+                  <!-- Name -->
+                  <div class="row mb-3">
+                    <label for="inputText" class="col-sm-3 col-form-label">Password</label>
+                    <div class="col-sm-9">
+                      <input type="password" class="form-control" id="password${meta.row}" value="" required />
+                    </div>
+                  </div>
+                  <!-- DOB -->
                   <div class="row mb-3">
                     <label for="inputDate" class="col-sm-3 col-form-label">DOB</label>
                     <div class="col-sm-9">
@@ -102,7 +149,7 @@ function tab() {
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                  <button type="button" class="btn btn-primary" onclick="updateSTD('${meta.row}')" data-bs-dismiss="modal">Update</button>
+                  <button type="button" class="btn btn-primary" onclick="updateSTD('${meta.row}','${data.id}')" data-bs-dismiss="modal">Update</button>
                 </div>
               </div>
             </div>
@@ -115,11 +162,12 @@ function tab() {
             <div class="modal-dialog">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h5 class="modal-title">Delete Student</h5>
+                  <h5 class="modal-title" style="font-weight:bold;">Delete Student</h5>
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-start">
                   <p>Are you sure you want to delete this Student?</p>
+                  <p>If you delete this student then all its data will be deleted permanently.</p>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
@@ -137,78 +185,246 @@ function tab() {
   });
 }
 
+function validateAndAdd() {
+  var course = document.getElementById("course").value;
+  var semester = document.getElementById("semester").value;
+  var name = document.getElementById("name").value.trim();
+  var dob = document.getElementById("dob").value.trim();
+  var rollNo = document.getElementById("rollNo").value.trim();
+  var email = document.getElementById("email").value.trim();
+  var password = document.getElementById("password").value.trim();
+
+  const errormsgcourse = document.getElementById("errormsgcourse");
+  const errormsgsem = document.getElementById("errormsgsem");
+  const errormsgname = document.getElementById("errormsgname");
+  const errormsgdob = document.getElementById("errormsgdob");
+  const errormsgrollno = document.getElementById("errormsgrollno");
+  const errormsgemail = document.getElementById("errormsgemail");
+  const errormsgpassword = document.getElementById("errormsgpassword");
+
+  let flag = true;
+
+  if (course === "") {
+    errormsgcourse.style.display = "block";
+    flag = false;
+  } else {
+    errormsgcourse.style.display = "none";
+  }
+
+  if (semester === "") {
+    errormsgsem.style.display = "block";
+    flag = false;
+  } else {
+    errormsgsem.style.display = "none";
+  }
+
+  if (rollNo === "") {
+    errormsgrollno.style.display = "block";
+    flag = false;
+  } else {
+    errormsgrollno.style.display = "none";
+  }
+
+  if (name === "") {
+    errormsgname.style.display = "block";
+    flag = false;
+  } else {
+    errormsgname.style.display = "none";
+  }
+
+  if (email === "") {
+    errormsgemail.style.display = "block";
+    flag = false;
+  } else if (!email.endsWith("@gmail.com")) {
+    errormsgemail.style.display = "block";
+    errormsgemail.textContent = "Email must end with @gmail.com";
+    flag = false;
+  } else {
+    errormsgemail.style.display = "none";
+  }
+
+  if (password === "") {
+    errormsgpassword.style.display = "block";
+    flag = false;
+  } else {
+    errormsgpassword.style.display = "none";
+  }
+
+  if (dob === "") {
+    errormsgdob.style.display = "block";
+    flag = false;
+  } else {
+    errormsgdob.style.display = "none";
+  }
+
+  if (flag) {
+    errormsgcourse.style.display = "none";
+    errormsgsem.style.display = "none";
+    errormsgname.style.display = "none";
+    errormsgdob.style.display = "none";
+    errormsgrollno.style.display = "none";
+    errormsgemail.style.display = "none";
+    errormsgpassword.style.display = "none";
+
+    Addstd();
+  }
+}
+
+
 // CRUD Operation
 
 // Add Student
-function Addstd() {
-  console.log("In add function");
+async function Addstd() {
   var std = {};
   std.name = document.getElementById("name").value.toUpperCase();
   std.courseId = document.getElementById("course").value;
-  var courseSelect = $("#course option:selected").text();
   std.semesterId = document.getElementById("semester").value;
-  var semesterSelect = $("#semester option:selected").text();
-  std.cgpa = parseFloat(document.getElementById("cgpa").value);
   std.dob = document.getElementById("dob").value;
+  std.rollNo = document.getElementById("rollNo").value;
+  std.email = document.getElementById("email").value;
+  std.status = true;
+  let password = document.getElementById("password").value;
+  var user = {};
+  user.role = "Student";
+  user.name = std.name;
+  user.email = std.email;
+  user.password = CryptoJS.SHA256(password).toString();
 
+  let flag = true;
   var duplicate = students.some(function (object) {
     return (
-      object.name.toUpperCase() === std.name.toUpperCase() &&
-      object.course.toUpperCase() === courseSelect.toUpperCase() &&
-      object.semester === semesterSelect &&
-      object.dob === std.dob
+      object.rollNo === std.rollNo
     );
   });
-  if (duplicate) alert("Student already exists!");
+  // Check for duplicate email
+  var duplicate1 = users.some(function (object) {
+    return object.email === std.email;
+  });
+  if (duplicate) {
+    document.getElementById("errormsgrollno").style.display = "block";
+    document.getElementById("errormsgrollno").textContent = "User with this roll no already exists!";
+    flag = false;
+  }
+  else if (duplicate1) {
+    document.getElementById("errormsgemail").style.display = "block";
+    document.getElementById("errormsgemail").textContent = "User with this email already exists!";
+    flag = false;
+  }
+
   else {
-    setData(`${varStd}/${randomID()}`, std)
+    if (flag) {
+      document.getElementById("course").value = "";
+      document.getElementById("semester").value = "";
+      document.getElementById("name").value = "";
+      document.getElementById("dob").value = "";
+      document.getElementById("rollNo").value = "";
+      document.getElementById("email").value = "";
+      document.getElementById("password").value = "";
+
+      bootstrap.Modal.getInstance(document.getElementById('basicModal')).hide();
+    }
+    var stdID = randomID();
+    subjects.length = 0;
+    subjects = await queryByKeyValue(varSub, "semesterId", std.semesterId);
+    for (let i = 0; i < subjects.length; i++) {
+      var mark = {}
+      mark.courseId = std.courseId;
+      mark.semesterId = std.semesterId;
+      mark.subjectId = subjects[i].id;
+      mark.studentId = stdID;
+      mark.marks = 0;
+      mark.totalMarks = subjects[i].marks;
+      mark.status = true;
+      mark.grade = 'F';
+      await setData(`${varMarks}/${randomID()}`, mark);
+    }
+    await setData(`${varStd}/${stdID}`, std)
+    users.studentId = stdID;
+    await setData(`${varUser}/${stdID}`, user)
       .then(() => {
         initializtion();
       })
       .catch((error) => {
         console.error("Error:", error);
       });
-  }
 
-  document.getElementById("name").value = "";
-  document.getElementById("course").selectedIndex = 0;
-  document.getElementById("semester").selectedIndex = 0;
-  document.getElementById("cgpa").value = "";
-  document.getElementById("dob").value = "";
+  }
 }
 
-function delSTD(index) {
-  removeData(`${varStd}/${index}`)
+async function delSTD(index) {
+  var markData = await queryByKeyValue(varMarks, "studentId", index);
+  markData.forEach(async (mark) => {
+    await removeData(`${varMarks}/${mark.id}`);
+  });
+  await removeData(`${varStd}/${index}`);
+  await removeData(`${varUser}/${index}`)
     .then(() => {
       initializtion();
     })
     .catch((error) => console.error("Error deleting student:", error));
 }
 
-function updateSTD(index) {
+async function updateSTD(index, id) {
   var std = {};
   std.name = document.getElementById(`name${index}`).value.toUpperCase();
   std.courseId = document.getElementById(`course${index}`).value;
-  let courseSelect = $(`#course${index} option:selected`).text();
   std.semesterId = document.getElementById(`semester${index}`).value;
-  let semesterSelect = $(`#semester${index} option:selected`).text();
-  std.cgpa = parseFloat(document.getElementById(`cgpa${index}`).value);
   std.dob = document.getElementById(`dob${index}`).value;
+  std.rollNo = document.getElementById(`rollNo${index}`).value;
+  std.email = document.getElementById(`email${index}`).value;
+  std.rollNo = document.getElementById(`rollNo${index}`).value;
 
+  let password = document.getElementById(`password${index}`).value;
   var duplicate = students.some(function (object) {
     return (
-      object.name.toUpperCase() === std.name.toUpperCase() &&
-      object.course.toUpperCase() === courseSelect.toUpperCase() &&
-      object.semester === semesterSelect &&
-      object.dob === std.dob &&
-      object.cgpa === std.cgpa
-
+      object.name === std.name &&
+      object.courseId === std.courseId &&
+      object.semesterId === std.semesterId &&
+      object.rollNo != std.rollNo
     );
   });
   if (duplicate) alert("Student already exists!");
+  else if (std.name === "" || std.email === "") { alert("Name and Email is required"); }
   else {
-    console.log("Updated Data: " + JSON.stringify(std));
-
+    let preSTD = students.find((temp) => {
+      return temp.id == id;
+    })
+    let marks1 = await queryByKeyValue(varMarks, "studentId", id, "semesterId", preSTD.semesterId);
+    marks1.forEach(async (mark) => {
+      await updateData(`${varMarks}/${mark.id}`, { status: false });
+    });
+    if (preSTD.semesterId != std.semesterId) {
+      console.log("Semester changed");
+      let marks_ = await queryByKeyValue(varMarks, "studentId", id, "semesterId", std.semesterId)
+      if (marks_.length == 0) {
+        console.log("No marks found")
+        var subjects_ = [];
+        subjects_.length = 0;
+        subjects_ = await queryByKeyValue(varSub, "semesterId", std.semesterId);
+        for (let i = 0; i < subjects_.length; i++) {
+          var mark = {}
+          mark.courseId = std.courseId;
+          mark.semesterId = std.semesterId;
+          mark.subjectId = subjects_[i].id;
+          mark.studentId = id;
+          mark.marks = 0;
+          mark.totalMarks = subjects_[i].marks;
+          mark.status = true;
+          mark.grade = 'F';
+          setData(`${varMarks}/${randomID()}`, mark);
+        }
+      }
+      else {
+        marks_.forEach(async (mark) => {
+          await updateData(`${varMarks}/${mark.id}`, { status: true });
+        });
+      }
+    }
+    if (students)
+      await updateData(`${varUser}/${id}`, { email: std.email, name: std.name });
+    if (password !== "") {
+      await updateData(`${varUser}/${id}`, { password: CryptoJS.SHA256(password).toString() });
+    }
     updateData(`${varStd}/${students[index].id}`, std)
       .then(() => {
         initializtion();
@@ -217,9 +433,20 @@ function updateSTD(index) {
   }
 }
 
-window.Addstd = Addstd;
+if (user.role === "Admin" || user.role === "Supreme Admin") {
+  document.getElementById("showTranscript").innerHTML = `<li class="nav-item">
+      <a class="nav-link collapsed" href="admin-transcript.html">
+        <i class="fa-regular fa-file"></i>
+        <span>Transcript</span>
+      </a>
+    </li>`
+}
+
+window.validateAndAdd = validateAndAdd;
 window.delSTD = delSTD;
 window.updateSTD = updateSTD;
 window.dropdownOptions = dropdownOptions;
 // Initial call
 initializtion();
+
+export { delSTD, calculateGPA }

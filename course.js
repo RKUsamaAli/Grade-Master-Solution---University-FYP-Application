@@ -1,8 +1,18 @@
-import { setData, updateData, removeData, randomID } from "./firebaseConfig.js";
+import { setData, updateData, removeData, randomID, queryByKeyValue } from "./firebaseConfig.js";
 
-import { getCourses, varCour } from "./main.js";
+import { getCourses, varCour, varSem, getCookie } from "./main.js";
+
+import { delSemester } from './semester.js'
 var courses = [];
 let flagTab = false;
+
+let user = await JSON.parse(getCookie("user"));
+document.addEventListener("DOMContentLoaded", async () => {
+  document.getElementById("username").innerHTML = user.name;
+  document.getElementById("username1").innerHTML = user.name;
+  document.getElementById("role").innerHTML = user.role;
+});
+
 async function initializtion() {
   try {
     document.getElementById('loader').style.display = 'block';
@@ -40,11 +50,14 @@ function tab() {
             <a href="#" data-bs-toggle="modal" data-bs-target="#${updateMID}" style="margin-right: 10px;">
               <i class="fa-solid fa-pencil fa-lg" style="color: #0f54ae;"></i>
             </a>
+            <span class="form-switch" style="margin-right: 10px;">
+              <input class="form-check-input" type="checkbox" id="${row.id}" ${row.status === true ? "checked" : ""} onchange="changestatus('${row.id}')">
+            </span>          
             <div class="modal fade" id="${updateMID}" tabindex="-1">
               <div class="modal-dialog">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 class="modal-title">Update Course</h5>
+                    <h5 class="modal-title" style="font-weight:bold;">Update Course</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
                   <div class="modal-body">
@@ -70,11 +83,12 @@ function tab() {
               <div class="modal-dialog">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 class="modal-title">Delete Course</h5>
+                    <h5 class="modal-title" style="font-weight:bold;">Delete Course</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
                   <div class="modal-body text-start">
                     <p>Are you sure you want to delete course "${row.name}"?</p>
+                    <p>If you delete this course then all its semester, subjects and students will be deleted</p>
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
@@ -91,6 +105,25 @@ function tab() {
   });
 }
 
+// validation
+function validateAndAdd() {
+  const courseName = document.getElementById("courseName").value.trim();
+  const errorMsg = document.getElementById("error-msg");
+
+  if (courseName === "") {
+    errorMsg.style.display = "block";
+  } else {
+    errorMsg.style.display = "none";
+    AddCourse();
+    document.getElementById("courseName").value = "";
+    bootstrap.Modal.getInstance(document.getElementById('basicModal')).hide();
+  }
+}
+
+async function changestatus(id) {
+  var status = document.getElementById(`${id}`).checked;
+  updateData(`${varCour}/${id}`, { status: status });
+}
 
 // CRUD Operations
 
@@ -104,7 +137,7 @@ function AddCourse() {
   if (exists) {
     alert("This course already exists!");
   } else if (name !== "") {
-    setData(`${varCour}/${randomID()}`, { name: name })
+    setData(`${varCour}/${randomID()}`, { name: name, status: true })
       .then(() => {
         initializtion();
       })
@@ -115,7 +148,11 @@ function AddCourse() {
 }
 
 // Delete Course
-function delCourse(id) {
+async function delCourse(id) {
+  var sem = await queryByKeyValue(varSem, "courseId", id);
+  sem.forEach(async (temp) => {
+    delSemester(temp.id);
+  });
   removeData(`${varCour}/${id}`)
     .then(() => {
       initializtion();
@@ -131,6 +168,10 @@ function updateCourse(rowIndex) {
     .toUpperCase();
   var oldName = courses[rowIndex].name;
 
+  if (newName == "") {
+    alert("Course name cannot be empty!");
+    return;
+  }
   if (newName !== oldName && newName !== "") {
     var index = courses.some(
       (course) => course.name.toUpperCase() === newName.toUpperCase()
@@ -148,9 +189,17 @@ function updateCourse(rowIndex) {
   }
 }
 
+if (user.role === "Admin" || user.role === "Supreme Admin") {
+  document.getElementById("showTranscript").innerHTML = `<li class="nav-item">
+      <a class="nav-link collapsed" href="admin-transcript.html">
+        <i class="fa-regular fa-file"></i>
+        <span>Transcript</span>
+      </a>
+    </li>`
+}
 // Expose functions to global scope
-window.AddCourse = AddCourse;
+window.validateAndAdd = validateAndAdd;
 window.delCourse = delCourse;
 window.updateCourse = updateCourse;
-
+window.changestatus = changestatus;
 initializtion();

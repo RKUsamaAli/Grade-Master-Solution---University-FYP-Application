@@ -28,7 +28,6 @@ const firebaseConfig = {
   appId: "1:389633784942:web:f3112504d1bd3a2623fa7f",
   measurementId: "G-V19XYLXY32",
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
@@ -65,33 +64,13 @@ function randomID(length = 10) {
   return result;
 }
 
-async function fetchDataAndConvert(path) {
-  var array = [];
-  try {
-    const snapshot = await getData(path);
-    if (snapshot.exists()) {
-      array.length = 0;
-      snapshot.forEach((childSnapshot) => {
-        const item = childSnapshot.val();
-        item.id = childSnapshot.key;
-        array.push(item);
-      });
-    } else {
-      console.log("No data available");
-    }
-  } catch (error) {
-    console.error("Error fetching data:", error);
-  }
-  return array;
-}
-
-async function queryByKeyValue(nodePath, key = null, value = null) {
+async function queryByKeyValue(nodePath, key1 = null, value1 = null, key2 = null, value2 = null, key3 = null, value3 = null) {
   try {
     const dbRef = ref(db, nodePath);
     let queryRef;
 
-    if (key && value) {
-      queryRef = query(dbRef, orderByChild(key), equalTo(value));
+    if (key1 && value1) {
+      queryRef = query(dbRef, orderByChild(key1), equalTo(value1));
     } else {
       queryRef = dbRef;
     }
@@ -103,9 +82,23 @@ async function queryByKeyValue(nodePath, key = null, value = null) {
       const rows = [];
 
       for (const [id, item] of Object.entries(data)) {
-        item.id = id;
-        rows.push(item);
+        let matchesKey2 = true;
+        let matchesKey3 = true;
+
+        if (key2 && value2) {
+          matchesKey2 = item[key2] === value2;
+        }
+
+        if (key3 && value3) {
+          matchesKey3 = item[key3] === value3;
+        }
+
+        if (matchesKey2 && matchesKey3) {
+          item.id = id;
+          rows.push(item);
+        }
       }
+
       return rows;
     } else {
       console.log("No data available for the given query.");
@@ -117,33 +110,11 @@ async function queryByKeyValue(nodePath, key = null, value = null) {
   }
 }
 
-
-
-function checkUserAuthentication(callback) {
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      callback(true, user);
-    } else {
-      callback(false);
-    }
-  });
-}
-
-function signOutUser() {
-  return signOut(auth);
-}
-
 export {
   setData,
   getData,
   updateData,
   removeData,
   randomID,
-  fetchDataAndConvert,
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  checkUserAuthentication,
-  signOutUser,
   queryByKeyValue
 };

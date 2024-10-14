@@ -6,12 +6,24 @@ import {
 } from "./firebaseConfig.js";
 import {
   getSem,
-  varCour,
   varSem,
-  dropdownOptions
-} from "./main.js"
+  dropdownOptions,
+  varStd,
+  varSub,
+  getCookie
+} from "./main.js";
+import { delSTD } from './student.js';
+import { delSub } from './subject.js';
 var semesters = [];
 let flagTab = false;
+
+let user = JSON.parse(getCookie("user"));
+document.addEventListener("DOMContentLoaded", async () => {
+  document.getElementById("username").innerHTML = user.name;
+  document.getElementById("username1").innerHTML = user.name;
+  document.getElementById("role").innerHTML = user.role;
+});
+
 async function initializtion() {
   try {
     document.getElementById('loader').style.display = 'block';
@@ -53,11 +65,12 @@ function tab() {
               <div class="modal-dialog">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 class="modal-title">Delete Semester</h5>
+                    <h5 class="modal-title" style="font-weight:bold;">Delete Semester</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
                   <div class="modal-body text-start">
-                    <p>Are you sure you want to delete Semester "${row.name}" of "${row.course}"?</p>
+                    <p>Are you sure you want to delete Semester "${row.name}" from "${row.course}"?</p>
+                    <p>If you delete this semester then all its subjects and students will be deleted</p>
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
@@ -72,6 +85,39 @@ function tab() {
       },
     ],
   });
+}
+
+// validation
+function validateAndAdd() {
+  var name = document.getElementById("semesterName").value.trim();
+  var course = document.getElementById("course").value;
+
+  const errormsgname = document.getElementById("error-msg-name");
+  const errormsgcourse = document.getElementById("error-msg-course");
+
+  let flag = true;
+
+  if (name === "") {
+    errormsgname.style.display = "block";
+    flag = false;
+  }
+
+  if (course === "") {
+    errormsgcourse.style.display = "block";
+    flag = false;
+  }
+
+  if (flag) {
+    errormsgname.style.display = "none";
+    errormsgcourse.style.display = "none";
+
+    AddSemester();
+
+    document.getElementById("semesterName").value = "";
+    document.getElementById("course").value = "";
+
+    bootstrap.Modal.getInstance(document.getElementById('basicModal')).hide();
+  }
 }
 
 // CRUD Operations
@@ -90,7 +136,7 @@ function AddSemester() {
   if (exists) {
     alert("This semester already exists!");
   } else if (name !== "") {
-    setData(`${varSem}/${randomID()}`, { name: name, courseId: course })
+    setData(`${varSem}/${randomID()}`, { name: name, courseId: course, status: true })
       .then(() => {
         initializtion();
       })
@@ -102,7 +148,15 @@ function AddSemester() {
 
 // Delete Semester
 
-function delSemester(id) {
+async function delSemester(id) {
+  var std = await queryByKeyValue(varStd, "semesterId", id);
+  std.forEach(async (mark) => {
+    delSTD(mark.id);
+  });
+  var sub = await queryByKeyValue(varSub, "semesterId", id);
+  sub.forEach(async (mark) => {
+    delSub(mark.id);
+  });
   removeData(`${varSem}/${id}`)
     .then(() => {
       initializtion();
@@ -110,10 +164,21 @@ function delSemester(id) {
     .catch((error) => console.error("Error deleting semester:", error));
 }
 
+if (user.role === "Admin" || user.role === "Supreme Admin") {
+  document.getElementById("showTranscript").innerHTML = `<li class="nav-item">
+      <a class="nav-link collapsed" href="admin-transcript.html">
+        <i class="fa-regular fa-file"></i>
+        <span>Transcript</span>
+      </a>
+    </li>`
+}
+
 // Course selection in addition
 
-window.AddSemester = AddSemester;
+window.validateAndAdd = validateAndAdd;
 window.delSemester = delSemester;
 window.dropdownOptions = dropdownOptions;
 
 initializtion();
+
+export { delSemester }
