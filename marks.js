@@ -22,11 +22,12 @@ async function initializtion() {
   try {
     document.getElementById('loader').style.display = 'block';
     document.getElementById('AddMarksTable').style.display = 'none';
+    document.getElementById('footer').style.display = 'none';
+    // Populate dropdown options
+    await dropdownOptions("course").then(() => dropdownOptions("semester").then(() => dropdownOptions('subject').then(() => showTable())));
     document.getElementById('AddMarksTable').style.display = 'block';
     document.getElementById('loader').style.display = 'none';
-    // Populate dropdown options
-    dropdownOptions("course").then(() => dropdownOptions("semester").then(() => dropdownOptions('subject').then(() => showTable())));
-
+    document.getElementById('footer').style.display = 'block';
 
   } catch (error) {
     console.error("Error initializing data:", error);
@@ -97,7 +98,12 @@ async function validateAndAdd() {
 async function showTable() {
   let sem = document.getElementById("semester").value;
   let sub = document.getElementById("subject").value;
-  const tableData = await queryByKeyValue(varMarks, "semesterId", sem, "subjectId", sub, "status", true);
+  document.getElementById('loader').style.display = 'block';
+  document.getElementById('stdMarks').style.display = 'none';
+  document.getElementById('footer').style.display = 'none';
+  var tableData = "";
+  if (sem != "" && sem != "")
+    tableData = await queryByKeyValue(varMarks, "semesterId", sem, "subjectId", sub, "status", true);
   let txt = ``;
   for (let i = 0; i < tableData.length; i++) {
     await getData(`${varStd}/${tableData[i].studentId}`).then((snap) => {
@@ -138,6 +144,10 @@ async function showTable() {
     document.getElementById("error").style.display = "none";
   }
   document.getElementById("stdData").innerHTML = txt;
+  document.getElementById('loader').style.display = 'none';
+  document.getElementById('stdMarks').style.display = 'block';
+  document.getElementById('footer').style.display = 'block';
+
 }
 
 

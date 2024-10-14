@@ -108,14 +108,6 @@
     <!-- End Sidebar-->
 
     <main id="main" class="main">
-        <!-- Loader -->
-        <div id="loader">
-            <div class="d-flex justify-content-center align-items-center" style="height: 77vh;">
-                <div class="spinner-border" style="width: 40px; height: 40px;" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            </div>
-        </div>
 
         <!-- Add Marks -->
         <section id="AddMarksTable" style="display: none;">
@@ -160,16 +152,26 @@
                                         subject</span>
                                 </div>
                             </div>
-                            <h5 class="card-title mt-3">Students</h5>
-                            <!-- Table with hoverable rows -->
-                            <table class="table table-hover" id="stdData">
-                            </table>
+                            <div id="stdMarks">
+                                <h5 class="card-title mt-3">Students</h5>
+                                <!-- Table with hoverable rows -->
+                                <table class="table table-hover" id="stdData">
+                                </table>
+                            </div>
                             <!-- End Table with hoverable rows -->
                         </div>
                     </div>
                 </div>
             </div>
         </section>
+        <!-- Loader -->
+        <div id="loader">
+            <div class="d-flex justify-content-center align-items-center" style="height: 55vh;">
+                <div class="spinner-border" style="width: 40px; height: 40px;" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
     </main>
     <!-- End #main -->
 

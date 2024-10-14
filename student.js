@@ -14,12 +14,10 @@ import {
   dropdownOptions,
   getCookie,
   calculateGPA,
-  getUsers
 } from "./main.js";
 
 var students = [];
 var subjects = [];
-var users = [];
 let flagTab = false;
 
 let user = JSON.parse(getCookie("user"));
@@ -38,8 +36,6 @@ async function initializtion() {
     document.getElementById('contentSection').style.display = 'none';
     students.length = 0;
     students = await getStd();
-    users.length = 0;
-    users = await getUsers();
 
     // calculate gpa
     for (let i = 0; i < students.length; i++) {
@@ -297,7 +293,7 @@ async function Addstd() {
     );
   });
   // Check for duplicate email
-  var duplicate1 = users.some(function (object) {
+  var duplicate1 = students.some(function (object) {
     return object.email === std.email;
   });
   if (duplicate) {
@@ -339,7 +335,6 @@ async function Addstd() {
       await setData(`${varMarks}/${randomID()}`, mark);
     }
     await setData(`${varStd}/${stdID}`, std)
-    users.studentId = stdID;
     await setData(`${varUser}/${stdID}`, user)
       .then(() => {
         initializtion();
