@@ -54,23 +54,52 @@ async function showTable() {
       semester = data.val();
     });
     var cgpa = await calculateGPA(stdID, false);
-    stdDetailTxt += `<h5 class="card-title mt-3">Student Detail</h5><div class="row" style="font-weight: bold;">
-            <div class="col-md-4 breadcrumb-item">
-                Name: ${std.name}
-            </div>
-            <div class="col-md-4">
-                Roll No: ${std.rollNo}
-            </div>
-            <div class="col-md-4">
-                Course: ${course.name}
-            </div>
-            <div class="col-md-4">
-                Semester: ${semester.name}
-            </div>
-            <div class="col-md-4">
-                CGPA: ${cgpa}
-            </div>
-        </div>`
+    stdDetailTxt += `
+    <h5 class="card-title mt-3">Student Detail</h5>
+
+<div class="row" style="font-weight: bold;">
+    <div class="col-md-4 breadcrumb-item" 
+         style="display: flex; align-items: center; margin-bottom: 10px;">
+        <span style="width: 30%; min-width: 80px;">Name:</span>
+        <span style="font-weight: normal; padding-left: 10px; flex-grow: 1;">
+            ${std.name}
+        </span>
+    </div>
+
+    <div class="col-md-4" 
+         style="display: flex; align-items: center; margin-bottom: 10px;">
+        <span style="width: 30%; min-width: 80px;">Roll No:</span>
+        <span style="font-weight: normal; padding-left: 10px; flex-grow: 1;">
+            ${std.rollNo}
+        </span>
+    </div>
+
+    <div class="col-md-4" 
+         style="display: flex; align-items: center; margin-bottom: 10px;">
+        <span style="width: 30%; min-width: 80px;">Course:</span>
+        <span style="font-weight: normal; padding-left: 10px; flex-grow: 1;">
+            ${course.name}
+        </span>
+    </div>
+
+    <div class="col-md-4" 
+         style="display: flex; align-items: center; margin-bottom: 10px;">
+        <span style="width: 30%; min-width: 80px;">Semester:</span>
+        <span style="font-weight: normal; padding-left: 10px; flex-grow: 1;">
+            ${semester.name}
+        </span>
+    </div>
+
+    <div class="col-md-4" 
+         style="display: flex; align-items: center; margin-bottom: 10px;">
+        <span style="width: 30%; min-width: 80px;">CGPA:</span>
+        <span style="font-weight: normal; padding-left: 10px; flex-grow: 1;">
+            ${cgpa}
+        </span>
+    </div>
+</div>
+
+    `
     let semesters = await queryByKeyValue(varSem, "courseId", std.courseId);
     for (let i = 0; i < semesters.length; i++) {
       var marks = [];

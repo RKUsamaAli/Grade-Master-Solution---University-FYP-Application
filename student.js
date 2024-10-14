@@ -13,7 +13,6 @@ import {
   varUser,
   dropdownOptions,
   getCookie,
-  calculateGPA,
 } from "./main.js";
 
 var students = [];
@@ -36,12 +35,6 @@ async function initializtion() {
     document.getElementById('contentSection').style.display = 'none';
     students.length = 0;
     students = await getStd();
-
-    // calculate gpa
-    for (let i = 0; i < students.length; i++) {
-      students[i].gpa = await calculateGPA(students[i].id, true);
-      students[i].cgpa = await calculateGPA(students[i].id, false);
-    }
 
     if (!flagTab) {
       tab();
@@ -67,8 +60,6 @@ function tab() {
       { title: "Email", data: "email" },
       { title: "Course", data: "course" },
       { title: "Semester", data: "semester" },
-      { title: "GPA", data: "gpa" },
-      { title: "CGPA", data: "cgpa" },
       { title: "DOB", data: "dob" },
       {
         data: null,
@@ -444,4 +435,4 @@ window.dropdownOptions = dropdownOptions;
 // Initial call
 initializtion();
 
-export { delSTD, calculateGPA }
+export { delSTD }
