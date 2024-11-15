@@ -1,6 +1,6 @@
 import { getData, setData, updateData, removeData, randomID } from "./firebaseConfig.js";
 
-import { getCookie, getUsers, varStd, varUser } from "./main.js";
+import { getCookie, getUsers, COLLECTIONS.students, COLLECTIONS.users } from "./main.js";
 import { delSTD } from "./student.js";
 var users = [];
 let flagTab = false;
@@ -220,7 +220,7 @@ async function AddUser() {
     console.log(user)
 
     // Add user data to the database
-    setData(`${varUser}/${randomID()}`, user)
+    setData(`${COLLECTIONS.users}/${randomID()}`, user)
       .then(() => {
         initializtion();
       })
@@ -273,18 +273,18 @@ async function updateUser(index, id) {
     }
 
 
-    // check for supreme admin
+    // check for Super Admin
     if (id !== "nmVKNhl16oQt3rlHDH8VqHl3T3l1") {
       // Update user data in the database
-      await updateData(`${varStd}/${id}`, { email: email, name: name });
-      await updateData(`${varUser}/${id}`, updatedUser)
+      await updateData(`${COLLECTIONS.students}/${id}`, { email: email, name: name });
+      await updateData(`${COLLECTIONS.users}/${id}`, updatedUser)
         .then(() => {
           initializtion();
         })
         .catch((error) => console.error("Error updating user:", error));
     }
     else {
-      alert("Supreme Admin can't be updated!!!");
+      alert("Super Admin can't be updated!!!");
     }
   }
 }
@@ -292,25 +292,25 @@ async function updateUser(index, id) {
 
 async function delUser(id) {
   let email = "";
-  await getData(`${varUser}/${id}`).then((snap) => {
+  await getData(`${COLLECTIONS.users}/${id}`).then((snap) => {
     if (snap.exists()) {
       email = snap.val().email;
     }
   });
   if (email !== "usamaali@gmail.com") {
     await delSTD(id)
-    removeData(`${varUser}/${id}`)
+    removeData(`${COLLECTIONS.users}/${id}`)
       .then(() => {
         initializtion();
       })
       .catch((error) => console.error("Error deleting semester:", error));
   }
   else {
-    alert("Supreme Admin can't be deleted!!!");
+    alert("Super Admin can't be deleted!!!");
   }
 }
 
-if (user.role === "Admin" || user.role === "Supreme Admin") {
+if (user.role === "Admin" || user.role === "Super Admin") {
   document.getElementById("showTranscript").innerHTML = `<li class="nav-item">
       <a class="nav-link collapsed" href="admin-transcript.html">
         <i class="fa-regular fa-file"></i>

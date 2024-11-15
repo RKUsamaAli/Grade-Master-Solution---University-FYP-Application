@@ -733,7 +733,7 @@ interface ContextSubMenu extends CommonMenuItemSpec {
     type: 'submenu';
     text: string;
     icon?: string;
-    getSubmenuItems: () => string | Array<ContextMenuContents>;
+    getSubjectsmenuItems: () => string | Array<ContextMenuContents>;
 }
 type ContextMenuContents = string | ContextMenuItem | SeparatorMenuItemSpec | ContextSubMenu;
 interface ContextMenuApi {
@@ -795,7 +795,7 @@ type NestedMenuItemContents = string | MenuItemSpec | NestedMenuItemSpec | Toggl
 interface NestedMenuItemSpec extends CommonMenuItemSpec {
     type?: 'nestedmenuitem';
     icon?: string;
-    getSubmenuItems: () => string | Array<NestedMenuItemContents>;
+    getSubjectsmenuItems: () => string | Array<NestedMenuItemContents>;
     onSetup?: (api: NestedMenuItemInstanceApi) => (api: NestedMenuItemInstanceApi) => void;
 }
 interface NestedMenuItemInstanceApi extends CommonMenuItemInstanceApi {

@@ -7926,7 +7926,7 @@
           }
         });
       };
-      const getSubmenuParents = container => submenuParentItems.get().getOrThunk(() => {
+      const getSubjectsmenuParents = container => submenuParentItems.get().getOrThunk(() => {
         const r = {};
         const items = descendants(container.element, `.${ detail.markers.item }`);
         const parentItems = filter$2(items, i => get$g(i, 'aria-haspopup') === 'true');
@@ -7940,7 +7940,7 @@
         return r;
       });
       const updateAriaExpansions = (container, path) => {
-        const parentItems = getSubmenuParents(container);
+        const parentItems = getSubjectsmenuParents(container);
         each(parentItems, (v, k) => {
           const expanded = contains$2(path, k);
           set$9(v.element, 'aria-expanded', expanded);
@@ -8213,7 +8213,7 @@
         }
       } : {};
       const isFirstTierSubmenu = triggeringPaths => triggeringPaths.length === 2;
-      const getSubmenuLayouts = triggeringPaths => isFirstTierSubmenu(triggeringPaths) ? layouts : {};
+      const getSubjectsmenuLayouts = triggeringPaths => isFirstTierSubmenu(triggeringPaths) ? layouts : {};
       return tieredMenu.sketch({
         dom: { tag: 'div' },
         data: menuSpec.data,
@@ -8237,7 +8237,7 @@
             anchor: {
               type: 'submenu',
               item,
-              ...getSubmenuLayouts(triggeringPaths)
+              ...getSubjectsmenuLayouts(triggeringPaths)
             }
           });
         },
@@ -8245,7 +8245,7 @@
           const sink = lazySink().getOrDie();
           Positioning.positionWithinBounds(sink, primaryMenu, placementSpec, getBounds());
           each$1(submenuTriggers, st => {
-            const submenuLayouts = getSubmenuLayouts(st.triggeringPath);
+            const submenuLayouts = getSubjectsmenuLayouts(st.triggeringPath);
             Positioning.position(sink, st.triggeredMenu, {
               anchor: {
                 type: 'submenu',
@@ -11639,7 +11639,7 @@
     const icon = requiredString('icon');
     const value$1 = requiredString('value');
     const fetch$1 = requiredFunction('fetch');
-    const getSubmenuItems = requiredFunction('getSubmenuItems');
+    const getSubjectsmenuItems = requiredFunction('getSubjectsmenuItems');
     const onAction = requiredFunction('onAction');
     const onItemAction = requiredFunction('onItemAction');
     const onSetup = defaultedFunction('onSetup', () => noop);
@@ -11835,7 +11835,7 @@
 
     const nestedMenuItemSchema = objOf([
       type,
-      getSubmenuItems,
+      getSubjectsmenuItems,
       onSetup,
       optionalIcon
     ].concat(commonMenuItemFields));
@@ -12980,7 +12980,7 @@
           setIconColor(api, name, lastColor.get());
           return onSetupEditableToggle(editor)(api);
         },
-        getSubmenuItems: () => [{
+        getSubjectsmenuItems: () => [{
             type: 'fancymenuitem',
             fancytype: 'colorswatch',
             select: select$1(editor, format),
@@ -14040,7 +14040,7 @@
       const alloyItems = cat(map$2(items, item => {
         const itemHasIcon = i => isHorizontalMenu ? !has$2(i, 'text') : hasIcons;
         const createItem = i => createMenuItemFromBridge(i, itemResponse, backstage, itemHasIcon(i), isHorizontalMenu);
-        if (item.type === 'nestedmenuitem' && item.getSubmenuItems().length <= 0) {
+        if (item.type === 'nestedmenuitem' && item.getSubjectsmenuItems().length <= 0) {
           return createItem({
             ...item,
             enabled: false
@@ -17529,7 +17529,7 @@
 
     const isMenuItemReference = item => isString(item);
     const isSeparator$2 = item => item.type === 'separator';
-    const isExpandingMenuItem = item => has$2(item, 'getSubmenuItems');
+    const isExpandingMenuItem = item => has$2(item, 'getSubjectsmenuItems');
     const separator$2 = { type: 'separator' };
     const unwrapReferences = (items, menuItems) => {
       const realItems = foldl(items, (acc, item) => {
@@ -17553,7 +17553,7 @@
       return realItems;
     };
     const getFromExpandingItem = (item, menuItems) => {
-      const submenuItems = item.getSubmenuItems();
+      const submenuItems = item.getSubjectsmenuItems();
       const rest = expand(submenuItems, menuItems);
       const newMenus = deepMerge(rest.menus, { [item.value]: rest.items });
       const newExpansions = deepMerge(rest.expansions, { [item.value]: item.value });
@@ -17627,7 +17627,7 @@
         return {
           type: 'nestedmenuitem',
           text: item.text,
-          getSubmenuItems: () => fetchItems(dropdownComp, name, item.items, selectedValue, hasNestedItems)
+          getSubjectsmenuItems: () => fetchItems(dropdownComp, name, item.items, selectedValue, hasNestedItems)
         };
       } else {
         return {
@@ -23662,7 +23662,7 @@
               type: 'nestedmenuitem',
               text: translatedText,
               enabled: items.length > 0,
-              getSubmenuItems: () => bind$3(rawItem.getStyleItems(), si => validate(si, response, value))
+              getSubjectsmenuItems: () => bind$3(rawItem.getStyleItems(), si => validate(si, response, value))
             });
           }
         } else {
@@ -23856,7 +23856,7 @@
       editor.ui.registry.addNestedMenuItem('align', {
         text: backstage.shared.providers.translate(menuTitle$4),
         onSetup: onSetupEditableToggle(editor),
-        getSubmenuItems: () => menuItems.items.validateItems(menuItems.getStyleItems())
+        getSubjectsmenuItems: () => menuItems.items.validateItems(menuItems.getStyleItems())
       });
     };
 
@@ -23909,7 +23909,7 @@
       editor.ui.registry.addNestedMenuItem('blocks', {
         text: menuTitle$3,
         onSetup: onSetupEditableToggle(editor),
-        getSubmenuItems: () => menuItems.items.validateItems(menuItems.getStyleItems())
+        getSubjectsmenuItems: () => menuItems.items.validateItems(menuItems.getStyleItems())
       });
     };
 
@@ -23999,7 +23999,7 @@
       editor.ui.registry.addNestedMenuItem('fontfamily', {
         text: backstage.shared.providers.translate(menuTitle$2),
         onSetup: onSetupEditableToggle(editor),
-        getSubmenuItems: () => menuItems.items.validateItems(menuItems.getStyleItems())
+        getSubjectsmenuItems: () => menuItems.items.validateItems(menuItems.getStyleItems())
       });
     };
 
@@ -24434,7 +24434,7 @@
       editor.ui.registry.addNestedMenuItem('fontsize', {
         text: menuTitle$1,
         onSetup: onSetupEditableToggle(editor),
-        getSubmenuItems: () => menuItems.items.validateItems(menuItems.getStyleItems())
+        getSubjectsmenuItems: () => menuItems.items.validateItems(menuItems.getStyleItems())
       });
     };
 
@@ -24505,7 +24505,7 @@
       editor.ui.registry.addNestedMenuItem('styles', {
         text: menuTitle,
         onSetup: onSetupEditableToggle(editor),
-        getSubmenuItems: () => menuItems.items.validateItems(menuItems.getStyleItems())
+        getSubjectsmenuItems: () => menuItems.items.validateItems(menuItems.getStyleItems())
       });
     };
 
@@ -26458,7 +26458,7 @@
       editor.ui.registry.addNestedMenuItem(spec.name, {
         type: 'nestedmenuitem',
         text: spec.text,
-        getSubmenuItems: getMenuItems,
+        getSubjectsmenuItems: getMenuItems,
         onSetup: spec.onMenuSetup
       });
     };
@@ -27218,8 +27218,8 @@
           return {
             type: 'nestedmenuitem',
             ...commonMenuItem(item),
-            getSubmenuItems: () => {
-              const items = item.getSubmenuItems();
+            getSubjectsmenuItems: () => {
+              const items = item.getSubjectsmenuItems();
               if (isString(items)) {
                 return items;
               } else {

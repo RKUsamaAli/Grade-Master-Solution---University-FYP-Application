@@ -5,7 +5,7 @@ import {
   randomID,
   queryByKeyValue
 } from "./firebaseConfig.js";
-import { getSub, varSub, dropdownOptions, varStd, getCookie, varMarks } from "./main.js";
+import { getSubjects, COLLECTIONS, dropdownOptions, getCookie } from "./common.js";
 var subjects = [];
 let flagTab = false;
 
@@ -23,7 +23,7 @@ async function initializtion() {
     document.getElementById('loader').style.display = 'block';
     document.getElementById('contentSection').style.display = 'none';
     subjects.length = 0;
-    subjects = await getSub();
+    subjects = await getSubjects();
     if (!flagTab) {
       tab();
       flagTab = true;
@@ -252,7 +252,7 @@ async function AddSub() {
     var subID = randomID();
     var std = [];
     std.length = 0;
-    std = await queryByKeyValue(varStd, "semesterId", semester);
+    std = await queryByKeyValue(COLLECTIONS.students, "semesterId", semester);
     for (let i = 0; i < std.length; i++) {
       var mark = {}
       mark.courseId = course;
@@ -263,9 +263,9 @@ async function AddSub() {
       mark.totalMarks = marks;
       mark.status = true;
       mark.grade = 'F';
-      setData(`${varMarks}/${randomID()}`, mark);
+      setData(`${COLLECTIONS.marks}/${randomID()}`, mark);
     }
-    setData(`${varSub}/${subID}`, {
+    setData(`${COLLECTIONS.subjects}/${subID}`, {
       name: name.toUpperCase(),
       marks: marks,
       courseId: course,
@@ -284,11 +284,11 @@ async function AddSub() {
 
 // Delete Subject
 async function delSub(id) {
-  var markData = await queryByKeyValue(varMarks, "subjectId", id);
+  var markData = await queryByKeyValue(COLLECTIONS.marks, "subjectId", id);
   markData.forEach(async (mark) => {
-    await removeData(`${varMarks}/${mark.id}`);
+    await removeData(`${COLLECTIONS.marks}/${mark.id}`);
   });
-  removeData(`${varSub}/${id}`)
+  removeData(`${COLLECTIONS.subjects}/${id}`)
     .then(() => {
       initializtion();
     })
@@ -325,7 +325,7 @@ function updateSub(index, id) {
     }
 
   } else {
-    updateData(`${varSub}/${subjects[index].id}`, {
+    updateData(`${COLLECTIONS.subjects}/${subjects[index].id}`, {
       name: name.toUpperCase(),
       marks: marks,
       courseId: course,
@@ -338,7 +338,7 @@ function updateSub(index, id) {
       .catch((error) => console.error("Error updating course:", error));
   }
 }
-if (user.role === "Admin" || user.role === "Supreme Admin") {
+if (user.role === "Admin" || user.role === "Super Admin") {
   document.getElementById("showTranscript").innerHTML = `<li class="nav-item">
       <a class="nav-link collapsed" href="admin-transcript.html">
         <i class="fa-regular fa-file"></i>

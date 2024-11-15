@@ -4,14 +4,14 @@ import {
   randomID,
   queryByKeyValue
 } from "./firebaseConfig.js";
+
 import {
-  getSem,
-  varSem,
+  COLLECTIONS,
+  getSemesters,
   dropdownOptions,
-  varStd,
-  varSub,
   getCookie
-} from "./main.js";
+} from "./common.js";
+
 import { delSTD } from './student.js';
 import { delSub } from './subject.js';
 var semesters = [];
@@ -29,7 +29,7 @@ async function initializtion() {
     document.getElementById('loader').style.display = 'block';
     document.getElementById('contentSection').style.display = 'none';
     semesters.length = 0;
-    semesters = await getSem();
+    semesters = await getSemesters();
     if (!flagTab) {
       tab();
       flagTab = true;
@@ -136,7 +136,7 @@ function AddSemester() {
   if (exists) {
     alert("This semester already exists!");
   } else if (name !== "") {
-    setData(`${varSem}/${randomID()}`, { name: name, courseId: course, status: true })
+    setData(`${COLLECTIONS.semesters}/${randomID()}`, { name: name, courseId: course, status: true })
       .then(() => {
         initializtion();
       })
@@ -149,22 +149,22 @@ function AddSemester() {
 // Delete Semester
 
 async function delSemester(id) {
-  var std = await queryByKeyValue(varStd, "semesterId", id);
+  var std = await queryByKeyValue(COLLECTIONS.students, "semesterId", id);
   std.forEach(async (mark) => {
     delSTD(mark.id);
   });
-  var sub = await queryByKeyValue(varSub, "semesterId", id);
+  var sub = await queryByKeyValue(COLLECTIONS.subjects, "semesterId", id);
   sub.forEach(async (mark) => {
     delSub(mark.id);
   });
-  removeData(`${varSem}/${id}`)
+  removeData(`${COLLECTIONS.semesters}/${id}`)
     .then(() => {
       initializtion();
     })
     .catch((error) => console.error("Error deleting semester:", error));
 }
 
-if (user.role === "Admin" || user.role === "Supreme Admin") {
+if (user.role === "Admin" || user.role === "Super Admin") {
   document.getElementById("showTranscript").innerHTML = `<li class="nav-item">
       <a class="nav-link collapsed" href="admin-transcript.html">
         <i class="fa-regular fa-file"></i>

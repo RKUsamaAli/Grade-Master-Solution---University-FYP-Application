@@ -1636,7 +1636,7 @@
         return {
           type: 'nestedmenuitem',
           text,
-          getSubmenuItems: () => buildMenuItems(editor, item.menu, format, onAction)
+          getSubjectsmenuItems: () => buildMenuItems(editor, item.menu, format, onAction)
         };
       } else {
         return {
@@ -3315,7 +3315,7 @@
         editor.ui.registry.addNestedMenuItem('inserttable', {
           text: 'Table',
           icon: 'table',
-          getSubmenuItems: () => [{
+          getSubjectsmenuItems: () => [{
               type: 'fancymenuitem',
               fancytype: 'inserttable',
               onAction: insertTableAction
@@ -3344,21 +3344,21 @@
         editor.ui.registry.addNestedMenuItem('row', {
           type: 'nestedmenuitem',
           text: 'Row',
-          getSubmenuItems: constant('tableinsertrowbefore tableinsertrowafter tabledeleterow tablerowprops | tablecutrow tablecopyrow tablepasterowbefore tablepasterowafter')
+          getSubjectsmenuItems: constant('tableinsertrowbefore tableinsertrowafter tabledeleterow tablerowprops | tablecutrow tablecopyrow tablepasterowbefore tablepasterowafter')
         });
       }
       if (contains(hasColumnMenuItems, true)) {
         editor.ui.registry.addNestedMenuItem('column', {
           type: 'nestedmenuitem',
           text: 'Column',
-          getSubmenuItems: constant('tableinsertcolumnbefore tableinsertcolumnafter tabledeletecolumn | tablecutcolumn tablecopycolumn tablepastecolumnbefore tablepastecolumnafter')
+          getSubjectsmenuItems: constant('tableinsertcolumnbefore tableinsertcolumnafter tabledeletecolumn | tablecutcolumn tablecopycolumn tablepastecolumnbefore tablepastecolumnafter')
         });
       }
       if (contains(hasCellMenuItems, true)) {
         editor.ui.registry.addNestedMenuItem('cell', {
           type: 'nestedmenuitem',
           text: 'Cell',
-          getSubmenuItems: constant('tablecellprops tablemergecells tablesplitcells')
+          getSubjectsmenuItems: constant('tablecellprops tablemergecells tablesplitcells')
         });
       }
       editor.ui.registry.addContextMenu('table', {
@@ -3378,7 +3378,7 @@
         editor.ui.registry.addNestedMenuItem('tableclass', {
           icon: 'table-classes',
           text: 'Table styles',
-          getSubmenuItems: () => buildMenuItems(editor, tableClassList, 'tableclass', value => editor.execCommand('mceTableToggleClass', false, value)),
+          getSubjectsmenuItems: () => buildMenuItems(editor, tableClassList, 'tableclass', value => editor.execCommand('mceTableToggleClass', false, value)),
           onSetup: selectionTargets.onSetupTable
         });
       }
@@ -3387,7 +3387,7 @@
         editor.ui.registry.addNestedMenuItem('tablecellclass', {
           icon: 'table-cell-classes',
           text: 'Cell styles',
-          getSubmenuItems: () => buildMenuItems(editor, tableCellClassList, 'tablecellclass', value => editor.execCommand('mceTableCellToggleClass', false, value)),
+          getSubjectsmenuItems: () => buildMenuItems(editor, tableCellClassList, 'tablecellclass', value => editor.execCommand('mceTableCellToggleClass', false, value)),
           onSetup: selectionTargets.onSetupCellOrRow
         });
       }
@@ -3395,31 +3395,31 @@
         editor.ui.registry.addNestedMenuItem('tablecellvalign', {
           icon: 'vertical-align',
           text: 'Vertical align',
-          getSubmenuItems: () => buildMenuItems(editor, verticalAlignValues, 'tablecellverticalalign', applyTableCellStyle(editor, 'vertical-align')),
+          getSubjectsmenuItems: () => buildMenuItems(editor, verticalAlignValues, 'tablecellverticalalign', applyTableCellStyle(editor, 'vertical-align')),
           onSetup: selectionTargets.onSetupCellOrRow
         });
         editor.ui.registry.addNestedMenuItem('tablecellborderwidth', {
           icon: 'border-width',
           text: 'Border width',
-          getSubmenuItems: () => buildMenuItems(editor, getTableBorderWidths(editor), 'tablecellborderwidth', applyTableCellStyle(editor, 'border-width')),
+          getSubjectsmenuItems: () => buildMenuItems(editor, getTableBorderWidths(editor), 'tablecellborderwidth', applyTableCellStyle(editor, 'border-width')),
           onSetup: selectionTargets.onSetupCellOrRow
         });
         editor.ui.registry.addNestedMenuItem('tablecellborderstyle', {
           icon: 'border-style',
           text: 'Border style',
-          getSubmenuItems: () => buildMenuItems(editor, getTableBorderStyles(editor), 'tablecellborderstyle', applyTableCellStyle(editor, 'border-style')),
+          getSubjectsmenuItems: () => buildMenuItems(editor, getTableBorderStyles(editor), 'tablecellborderstyle', applyTableCellStyle(editor, 'border-style')),
           onSetup: selectionTargets.onSetupCellOrRow
         });
         editor.ui.registry.addNestedMenuItem('tablecellbackgroundcolor', {
           icon: 'cell-background-color',
           text: 'Background color',
-          getSubmenuItems: () => buildColorMenu(editor, getTableBackgroundColorMap(editor), 'background-color'),
+          getSubjectsmenuItems: () => buildColorMenu(editor, getTableBackgroundColorMap(editor), 'background-color'),
           onSetup: selectionTargets.onSetupCellOrRow
         });
         editor.ui.registry.addNestedMenuItem('tablecellbordercolor', {
           icon: 'cell-border-color',
           text: 'Border color',
-          getSubmenuItems: () => buildColorMenu(editor, getTableBorderColorMap(editor), 'border-color'),
+          getSubjectsmenuItems: () => buildColorMenu(editor, getTableBorderColorMap(editor), 'border-color'),
           onSetup: selectionTargets.onSetupCellOrRow
         });
       }

@@ -165,7 +165,7 @@
       editor.ui.registry.addNestedMenuItem('insertdatetime', {
         icon: 'insert-time',
         text: 'Date/time',
-        getSubmenuItems: () => global.map(formats, format => ({
+        getSubjectsmenuItems: () => global.map(formats, format => ({
           type: 'menuitem',
           text: getDateTime(editor, format),
           onAction: makeMenuItemHandler(format)

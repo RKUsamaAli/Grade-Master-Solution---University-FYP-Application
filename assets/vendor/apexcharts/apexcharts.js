@@ -2058,7 +2058,7 @@
           // ellipsis is needed
           if (textObj.getComputedTextLength() >= width / 1.1) {
             for (var x = textString.length - 3; x > 0; x -= 3) {
-              if (textObj.getSubStringLength(0, x) <= width / 1.1) {
+              if (textObj.getSubjectsStringLength(0, x) <= width / 1.1) {
                 textObj.textContent = textString.substring(0, x) + '...';
                 return;
               }

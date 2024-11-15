@@ -4,12 +4,11 @@ import {
   queryByKeyValue
 } from "./firebaseConfig.js";
 import {
-  varMarks,
+  COLLECTIONS,
   dropdownOptions,
-  varStd,
   convertMarksToGrade,
   getCookie
-} from "./main.js"
+} from "./common.js"
 
 let user = JSON.parse(getCookie("user"));
 document.addEventListener("DOMContentLoaded", async () => {
@@ -68,7 +67,7 @@ async function validateAndAdd() {
   }
   let sem = document.getElementById("semester").value;
   let sub = document.getElementById("subject").value;
-  const tableData = await queryByKeyValue(varMarks, "semesterId", sem, "subjectId", sub);
+  const tableData = await queryByKeyValue(COLLECTIONS.marks, "semesterId", sem, "subjectId", sub);
   for (let i = 0; i < tableData.length; i++) {
     let mark = parseFloat(document.getElementById(`${tableData[i].studentId}`).value);
     if (isNaN(mark) || mark < 0 || mark > tableData[i].totalMarks) {
@@ -103,10 +102,10 @@ async function showTable() {
   document.getElementById('footer').style.display = 'none';
   var tableData = "";
   if (sem != "" && sem != "")
-    tableData = await queryByKeyValue(varMarks, "semesterId", sem, "subjectId", sub, "status", true);
+    tableData = await queryByKeyValue(COLLECTIONS.marks, "semesterId", sem, "subjectId", sub, "status", true);
   let txt = ``;
   for (let i = 0; i < tableData.length; i++) {
-    await getData(`${varStd}/${tableData[i].studentId}`).then((snap) => {
+    await getData(`${COLLECTIONS.students}/${tableData[i].studentId}`).then((snap) => {
       if (snap.exists()) {
         const std = snap.val();
         tableData[i].student = std.name;
@@ -158,12 +157,12 @@ async function showTable() {
 async function AddMarks() {
   let sem = document.getElementById("semester").value;
   let sub = document.getElementById("subject").value;
-  const tableData = await queryByKeyValue(varMarks, "semesterId", sem, "subjectId", sub);
+  const tableData = await queryByKeyValue(COLLECTIONS.marks, "semesterId", sem, "subjectId", sub);
 
   for (let i = 0; i < tableData.length; i++) {
     let mark = parseFloat(document.getElementById(`${tableData[i].studentId}`).value);
     let grade = convertMarksToGrade(mark);
-    updateData(`${varMarks}/${tableData[i].id}`, { marks: mark, grade: grade })
+    updateData(`${COLLECTIONS.marks}/${tableData[i].id}`, { marks: mark, grade: grade })
   }
   document.getElementById('AddMarksTable').style.display = 'none';
   initializtion();
@@ -172,7 +171,7 @@ async function AddMarks() {
 // users-separation based on role
 
 let content = ``;
-if (user.role === "Admin" || user.role === "Supreme Admin") {
+if (user.role === "Admin" || user.role === "Super Admin") {
   content += `
     <li class="nav-item">
         <a class="nav-link collapsed" href="user.html">
@@ -206,7 +205,7 @@ if (user.role === "Admin" || user.role === "Supreme Admin") {
       </li>`
 }
 
-if (user.role === "Admin" || user.role === "Supreme Admin" || user.role === "Teacher") {
+if (user.role === "Admin" || user.role === "Super Admin" || user.role === "Teacher") {
   content += `<li class="nav-item">
         <a class="nav-link collapsed" href="marks.html">
           <i class="fa-solid fa-check"></i>
@@ -215,7 +214,7 @@ if (user.role === "Admin" || user.role === "Supreme Admin" || user.role === "Tea
       </li>`
 }
 
-if (user.role === "Admin" || user.role === "Supreme Admin") {
+if (user.role === "Admin" || user.role === "Super Admin") {
   content += `<li class="nav-item">
       <a class="nav-link collapsed" href="admin-transcript.html">
         <i class="fa-regular fa-file"></i>

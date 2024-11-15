@@ -1,11 +1,11 @@
 import { getData, queryByKeyValue } from "./firebaseConfig.js";
 
-import { getCookie, varUser, calculateGPA, varSub, varStd, varCour, varSem, varMarks } from "./main.js";
+import { getCookie, COLLECTIONS.users, calculateGPA, COLLECTIONS.subjects, COLLECTIONS.students, COLLECTIONS.courses, COLLECTIONS.semesters, COLLECTIONS.marks } from "./main.js";
 document.getElementById('loader').style.display = 'block';
 document.getElementById('contentSection').style.display = 'none';
 let user = JSON.parse(getCookie("user"));
 document.addEventListener("DOMContentLoaded", async () => {
-    await getData(`${varUser}/${user.id}`).then((snap) => {
+    await getData(`${COLLECTIONS.users}/${user.id}`).then((snap) => {
         document.getElementById("username").innerHTML = snap.val().name;
         document.getElementById("username1").innerHTML = snap.val().name;
         document.getElementById("role").innerHTML = snap.val().role;
@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 // users-separation based on role
 
 let content = ``;
-if (user.role === "Admin" || user.role === "Supreme Admin") {
+if (user.role === "Admin" || user.role === "Super Admin") {
     content += `
     <li class="nav-item">
         <a class="nav-link collapsed" href="user.html">
@@ -49,7 +49,7 @@ if (user.role === "Admin" || user.role === "Supreme Admin") {
       </li>`
 }
 
-if (user.role === "Admin" || user.role === "Supreme Admin" || user.role === "Teacher") {
+if (user.role === "Admin" || user.role === "Super Admin" || user.role === "Teacher") {
     content += `<li class="nav-item">
         <a class="nav-link collapsed" href="marks.html">
           <i class="fa-solid fa-check"></i>
@@ -81,18 +81,18 @@ document.getElementById("sidebar-nav").innerHTML = content;
 
 var gpatxt = ``;
 let student;
-await getData(`${varStd}/${user.id}`).then((snap) => {
+await getData(`${COLLECTIONS.students}/${user.id}`).then((snap) => {
     student = snap.val();
 })
 let course;
-await getData(`${varCour}/${student.courseId}`).then((snap) => {
+await getData(`${COLLECTIONS.courses}/${student.courseId}`).then((snap) => {
     course = snap.val();
     course.id = snap.key;
 });
-let semesters = await queryByKeyValue(varSem, "courseId", course.id);
+let semesters = await queryByKeyValue(COLLECTIONS.semesters, "courseId", course.id);
 for (let i = 0; i < semesters.length; i++) {
     var marks = [];
-    marks = await queryByKeyValue(varMarks, "studentId", user.id, "semesterId", semesters[i].id);
+    marks = await queryByKeyValue(COLLECTIONS.marks, "studentId", user.id, "semesterId", semesters[i].id);
     if (marks.length !== 0) {
         gpatxt += `
         <div class="col-lg-12">
@@ -111,7 +111,7 @@ for (let i = 0; i < semesters.length; i++) {
                 <tbody>`;
         for (let j = 0; j < marks.length; j++) {
             let subject;
-            await getData(`${varSub}/${marks[j].subjectId}`).then((snap) => {
+            await getData(`${COLLECTIONS.subjects}/${marks[j].subjectId}`).then((snap) => {
                 subject = snap.val();
             });
             gpatxt += `

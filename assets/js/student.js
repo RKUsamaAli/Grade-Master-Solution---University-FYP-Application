@@ -6,14 +6,11 @@ import {
   queryByKeyValue,
 } from "./firebaseConfig.js";
 import {
-  getStd,
-  varStd,
-  varSub,
-  varMarks,
-  varUser,
+  getStudents,
+  COLLECTIONS,
   dropdownOptions,
   getCookie,
-} from "./main.js";
+} from "./common.js";
 
 var students = [];
 var subjects = [];
@@ -34,7 +31,7 @@ async function initializtion() {
     document.getElementById('loader').style.display = 'block';
     document.getElementById('contentSection').style.display = 'none';
     students.length = 0;
-    students = await getStd();
+    students = await getStudents();
 
     if (!flagTab) {
       tab();
@@ -312,7 +309,7 @@ async function Addstd() {
     }
     var stdID = randomID();
     subjects.length = 0;
-    subjects = await queryByKeyValue(varSub, "semesterId", std.semesterId);
+    subjects = await queryByKeyValue(COLLECTIONS.subjects, "semesterId", std.semesterId);
     for (let i = 0; i < subjects.length; i++) {
       var mark = {}
       mark.courseId = std.courseId;
@@ -323,10 +320,10 @@ async function Addstd() {
       mark.totalMarks = subjects[i].marks;
       mark.status = true;
       mark.grade = 'F';
-      await setData(`${varMarks}/${randomID()}`, mark);
+      await setData(`${COLLECTIONS.marks}/${randomID()}`, mark);
     }
-    await setData(`${varStd}/${stdID}`, std)
-    await setData(`${varUser}/${stdID}`, user)
+    await setData(`${COLLECTIONS.students}/${stdID}`, std)
+    await setData(`${COLLECTIONS.users}/${stdID}`, user)
       .then(() => {
         initializtion();
       })
@@ -338,12 +335,12 @@ async function Addstd() {
 }
 
 async function delSTD(index) {
-  var markData = await queryByKeyValue(varMarks, "studentId", index);
+  var markData = await queryByKeyValue(COLLECTIONS.marks, "studentId", index);
   markData.forEach(async (mark) => {
-    await removeData(`${varMarks}/${mark.id}`);
+    await removeData(`${COLLECTIONS.marks}/${mark.id}`);
   });
-  await removeData(`${varStd}/${index}`);
-  await removeData(`${varUser}/${index}`)
+  await removeData(`${COLLECTIONS.students}/${index}`);
+  await removeData(`${COLLECTIONS.users}/${index}`)
     .then(() => {
       initializtion();
     })
@@ -375,18 +372,18 @@ async function updateSTD(index, id) {
     let preSTD = students.find((temp) => {
       return temp.id == id;
     })
-    let marks1 = await queryByKeyValue(varMarks, "studentId", id, "semesterId", preSTD.semesterId);
+    let marks1 = await queryByKeyValue(COLLECTIONS.marks, "studentId", id, "semesterId", preSTD.semesterId);
     marks1.forEach(async (mark) => {
-      await updateData(`${varMarks}/${mark.id}`, { status: false });
+      await updateData(`${COLLECTIONS.marks}/${mark.id}`, { status: false });
     });
     if (preSTD.semesterId != std.semesterId) {
       console.log("Semester changed");
-      let marks_ = await queryByKeyValue(varMarks, "studentId", id, "semesterId", std.semesterId)
+      let marks_ = await queryByKeyValue(COLLECTIONS.marks, "studentId", id, "semesterId", std.semesterId)
       if (marks_.length == 0) {
         console.log("No marks found")
         var subjects_ = [];
         subjects_.length = 0;
-        subjects_ = await queryByKeyValue(varSub, "semesterId", std.semesterId);
+        subjects_ = await queryByKeyValue(COLLECTIONS.subjects, "semesterId", std.semesterId);
         for (let i = 0; i < subjects_.length; i++) {
           var mark = {}
           mark.courseId = std.courseId;
@@ -397,21 +394,21 @@ async function updateSTD(index, id) {
           mark.totalMarks = subjects_[i].marks;
           mark.status = true;
           mark.grade = 'F';
-          setData(`${varMarks}/${randomID()}`, mark);
+          setData(`${COLLECTIONS.marks}/${randomID()}`, mark);
         }
       }
       else {
         marks_.forEach(async (mark) => {
-          await updateData(`${varMarks}/${mark.id}`, { status: true });
+          await updateData(`${COLLECTIONS.marks}/${mark.id}`, { status: true });
         });
       }
     }
     if (students)
-      await updateData(`${varUser}/${id}`, { email: std.email, name: std.name });
+      await updateData(`${COLLECTIONS.users}/${id}`, { email: std.email, name: std.name });
     if (password !== "") {
-      await updateData(`${varUser}/${id}`, { password: CryptoJS.SHA256(password).toString() });
+      await updateData(`${COLLECTIONS.users}/${id}`, { password: CryptoJS.SHA256(password).toString() });
     }
-    updateData(`${varStd}/${students[index].id}`, std)
+    updateData(`${COLLECTIONS.students}/${students[index].id}`, std)
       .then(() => {
         initializtion();
       })
@@ -419,7 +416,7 @@ async function updateSTD(index, id) {
   }
 }
 
-if (user.role === "Admin" || user.role === "Supreme Admin") {
+if (user.role === "Admin" || user.role === "Super Admin") {
   document.getElementById("showTranscript").innerHTML = `<li class="nav-item">
       <a class="nav-link collapsed" href="admin-transcript.html">
         <i class="fa-regular fa-file"></i>
