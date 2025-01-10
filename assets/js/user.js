@@ -1,6 +1,6 @@
 import { getData, setData, updateData, removeData, randomID } from "./firebaseConfig.js";
 
-import { getCookie, getUsers, COLLECTIONS.students, COLLECTIONS.users } from "./main.js";
+import { getCookie, getUsers, COLLECTIONS } from "./common.js";
 import { delSTD } from "./student.js";
 var users = [];
 let flagTab = false;
